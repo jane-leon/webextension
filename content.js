@@ -167,7 +167,6 @@ async function loadMovieInformation(modalElement) {
       title: movieTitle          // Send the movie title
     });
 
-
     // Check if we got data successfully
     if (response.success) {
       displayMovieInformation(response.data);
