@@ -7,18 +7,10 @@ const OMDB_API_URL = 'https://www.omdbapi.com/';
 const TMDB_API_KEY = '3126e89bfccb852840b00afa13857781'; 
 const TMDB_API_URL = 'https://api.themoviedb.org/3';
 
-
-
 // Create a cache to store movie data (like a dictionary/map)
 const movieDataCache = new Map();
-
-// Cache settings
 const CACHE_EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 const MAX_CACHE_SIZE = 100; // Maximum number of movies to cache
-
-// =============================================================================
-// MESSAGE HANDLING - Listen for requests from the content script
-// =============================================================================
 
 // This is how content script and background script communicate
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -35,16 +27,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.error('Error fetching movie data:', error);
         sendResponse({ success: false, error: error.message });
       });
-    
-    // Return true to indicate we'll send a response asynchronously
     return true;
   }
 });
 
-// =============================================================================
-// MAIN MOVIE FETCHING FUNCTION - Coordinates all data gathering
-// =============================================================================
-
+//fetching movie info!!
 async function fetchCompleteMovieInfo(movieTitle) {
   
   try {
@@ -101,26 +88,7 @@ async function fetchCompleteMovieInfo(movieTitle) {
 // =============================================================================
 
 function cleanMovieTitle(title) {
-  
-  let cleanedTitle = title
-    // Remove content in parentheses: "Movie Title (2021)" → "Movie Title"
-    .replace(/\([^)]*\)/g, '')
-    
-    // Remove content in square brackets: "Movie Title [HD]" → "Movie Title"
-    .replace(/\[[^\]]*\]/g, '')
-    
-    // Remove season information: "Show: Season 1" → "Show"
-    .replace(/:\s*Season\s*\d+/i, '')
-    
-    // Remove episode information: "Show: Episode 1" → "Show"
-    .replace(/:\s*Episode\s*\d+/i, '')
-    
-    // Clean up extra spaces: "Movie    Title" → "Movie Title"
-    .replace(/\s+/g, ' ')
-    
-    // Remove leading/trailing spaces
-    .trim();
-  
+  let cleanedTitle = title.replace(/\s+/g, ' ').trim();
   return cleanedTitle;
 }
 
@@ -137,7 +105,6 @@ async function fetchBasicMovieData(title) {
     // Make the API call
     const response = await fetch(apiUrl);
     const data = await response.json();
-    
     
     // Check if the API call was successful
     if (data.Response === 'False') {
@@ -214,7 +181,7 @@ async function fetchMovieReviews(title) {
     // Take the first 3 reviews and format them nicely
     const formattedReviews = data.results.slice(0, 3).map(review => ({
       author: review.author,
-      content: shortenText(review.content, 200), // Limit review length
+      content: shortenText(review.content, 300), // Limit review length
       rating: review.author_details.rating || 'N/A',
       url: review.url,
       created_at: formatDate(review.created_at)
@@ -288,7 +255,7 @@ async function fetchMovieDataFromTMDB(title) {
     }
     
     // Step 2: Get detailed movie info with credits
-    const detailUrl = `${TMDB_API_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}&append_to_response=credits`;
+    const detailUrl = `${TMDB_API_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}`;
     const response = await fetch(detailUrl);
     const tmdbData = await response.json();
     
@@ -297,18 +264,7 @@ async function fetchMovieDataFromTMDB(title) {
     const convertedData = {
       Title: tmdbData.title,
       Year: tmdbData.release_date ? tmdbData.release_date.substring(0, 4) : 'N/A',
-      Rated: 'N/A', // TMDB doesn't have MPAA ratings
       Released: tmdbData.release_date || 'N/A',
-      Runtime: tmdbData.runtime ? `${tmdbData.runtime} min` : 'N/A',
-      Genre: tmdbData.genres ? tmdbData.genres.map(g => g.name).join(', ') : 'N/A',
-      Director: extractDirectorFromCredits(tmdbData.credits),
-      Writer: 'N/A', // TMDB doesn't easily provide writer info
-      Actors: extractActorsFromCredits(tmdbData.credits),
-      Plot: tmdbData.overview || 'No plot available',
-      Language: tmdbData.original_language || 'N/A',
-      Country: tmdbData.production_countries ? 
-        tmdbData.production_countries.map(c => c.name).join(', ') : 'N/A',
-      Awards: 'N/A', // TMDB doesn't have awards info
       Poster: tmdbData.poster_path ? 
         `https://image.tmdb.org/t/p/w300${tmdbData.poster_path}` : 'N/A',
       Ratings: [
@@ -317,16 +273,10 @@ async function fetchMovieDataFromTMDB(title) {
           Value: tmdbData.vote_average ? `${tmdbData.vote_average}/10` : 'N/A'
         }
       ],
-      Metascore: 'N/A',
       imdbRating: tmdbData.vote_average ? tmdbData.vote_average.toFixed(1) : 'N/A',
       imdbVotes: tmdbData.vote_count ? tmdbData.vote_count.toLocaleString() : 'N/A',
       imdbID: tmdbData.imdb_id || 'N/A',
-      Type: 'movie',
-      DVD: 'N/A',
       BoxOffice: tmdbData.revenue ? formatSimpleBoxOffice(tmdbData.revenue) : 'N/A',
-      Production: tmdbData.production_companies ? 
-        tmdbData.production_companies.map(c => c.name).join(', ') : 'N/A',
-      Website: tmdbData.homepage || 'N/A',
       Response: 'True'
     };
     
@@ -418,22 +368,6 @@ function formatSimpleBoxOffice(revenue) {
   }
 }
 
-// Extract director name from TMDB credits
-function extractDirectorFromCredits(credits) {
-  if (!credits || !credits.crew) return 'N/A';
-  
-  const director = credits.crew.find(person => person.job === 'Director');
-  return director ? director.name : 'N/A';
-}
-
-// Extract main actors from TMDB credits
-function extractActorsFromCredits(credits) {
-  if (!credits || !credits.cast) return 'N/A';
-  
-  // Get the first 3 actors
-  const mainActors = credits.cast.slice(0, 3).map(actor => actor.name);
-  return mainActors.length > 0 ? mainActors.join(', ') : 'N/A';
-}
 
 // =============================================================================
 // CACHE MANAGEMENT FUNCTIONS - Store and retrieve movie data

@@ -123,25 +123,12 @@ function extractMovieTitle(modalElement) {
   return cleanupMovieTitle(movieTitle);
 }
 
-
-
 // Helper function to clean up extracted movie titles
 function cleanupMovieTitle(title) {
   if (!title) {
     return null;
   }
-
-  // Remove common Netflix UI text
-  title = title.replace(/^(Play|Add to List|More Info|Watch Now)/i, '');
-
-  // Clean up extra spaces
   title = title.replace(/\s+/g, ' ').trim();
-
-  // Make sure it's long enough to be a real title
-  if (title.length < 2) {
-    return null;
-  }
-
   return title;
 }
 
