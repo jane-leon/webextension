@@ -230,7 +230,7 @@ function buildRatingsSection(movieData) {
     if (rtRating) {
       ratingsHTML += `
         <div class="rating">
-          <span class="rating-label">🍅 RT</span>
+          <span class="rating-label">RT 🍅</span>
           <span class="rating-value">${rtRating.Value}</span>
         </div>
       `;

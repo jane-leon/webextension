@@ -197,13 +197,15 @@
   padding: 12px;
   background: var(--medium-color);
   border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
   text-align: center;
 }
 
 .movie-awards h5 {
   margin: 0 0 8px 0;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: var(--light-text-color);
 }
 
@@ -228,14 +230,14 @@
   margin: 0 0 6px 0;
   font-family: var(--font);
   color: var(--light-text-color);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   opacity: 0.9;
 }
 
 .box-office-amount {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--light-text-color)
 }
 
@@ -248,8 +250,8 @@
 
 .movie-reviews h5 {
   margin: 0 0 12px 0;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: var(--text-color);
 }
 
