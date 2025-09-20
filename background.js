@@ -1,6 +1,4 @@
-// Background script for Netflix Movie Info Extension
-
-// Background script for Netflix Movie Info Extension
+/* Background script for Netflix Movie Info Extension */
 
 // Built-in API configuration (no user setup required!)
 const OMDB_API_KEY = 'cb486c88'; 
