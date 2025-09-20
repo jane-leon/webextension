@@ -39,7 +39,7 @@ body {
 
 /* Formatting for instructions to use */
 .content {
-  padding: 0px 24px 24px;
+  padding: 3px 24px 24px;
   background: var(--bkg-color);
   color: var(--text-color);
 }
