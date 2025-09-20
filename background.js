@@ -1,233 +1,455 @@
-/* Background script for Netflix Movie Info Extension */
+// =============================================================================
+// NETFLIX MOVIE INFO EXTENSION - BACKGROUND SCRIPT (Beginner-Friendly Version)
+// =============================================================================
+// This script runs in the background and handles API calls to movie databases
+// It fetches movie information when requested by the content script
 
-// Load API keys from config file
-const OMDB_API_KEY = CONFIG?.OMDB_API_KEY || 'demo-key';
-const OMDB_BASE_URL = 'https://www.omdbapi.com/';
+// =============================================================================
+// API CONFIGURATION - Keys and URLs for movie data services
+// =============================================================================
 
-const TMDB_API_KEY = CONFIG?.TMDB_API_KEY || 'demo-key';
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+// OMDb API (Open Movie Database) - Primary source for movie info
+const OMDB_API_KEY = 'cb486c88'; // TODO: Replace with your own API key
+const OMDB_API_URL = 'https://www.omdbapi.com/';
 
-// Cache for movie data to reduce API calls
-const movieCache = new Map();
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+// TMDB API (The Movie Database) - Used for reviews and additional data
+const TMDB_API_KEY = '3126e89bfccb852840b00afa13857781'; // TODO: Replace with your own API key  
+const TMDB_API_URL = 'https://api.themoviedb.org/3';
 
-// Listen for messages from content script
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'getMovieInfo') {
-    getMovieInfo(request.title)
-      .then(data => sendResponse({ success: true, data }))
-      .catch(error => sendResponse({ success: false, error: error.message }));
+// =============================================================================
+// CACHING SYSTEM - Store movie data to avoid repeated API calls
+// =============================================================================
+
+// Create a cache to store movie data (like a dictionary/map)
+const movieDataCache = new Map();
+
+// Cache settings
+const CACHE_EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const MAX_CACHE_SIZE = 100; // Maximum number of movies to cache
+
+// =============================================================================
+// MESSAGE HANDLING - Listen for requests from the content script
+// =============================================================================
+
+// This is how content script and background script communicate
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('📨 Received message from content script:', message);
+  
+  // Check if the content script is asking for movie information
+  if (message.action === 'getMovieInfo') {
+    console.log('🎬 Request to get movie info for:', message.title);
     
-    return true; // Will respond asynchronously
+    // Fetch the movie information (this is async, so we need to handle it properly)
+    fetchCompleteMovieInfo(message.title)
+      .then(movieData => {
+        console.log('✅ Successfully fetched movie data');
+        sendResponse({ success: true, data: movieData });
+      })
+      .catch(error => {
+        console.error('❌ Error fetching movie data:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    
+    // Return true to indicate we'll send a response asynchronously
+    return true;
   }
 });
 
-// Main function to get movie information
-async function getMovieInfo(title) {
+// =============================================================================
+// MAIN MOVIE FETCHING FUNCTION - Coordinates all data gathering
+// =============================================================================
+
+async function fetchCompleteMovieInfo(movieTitle) {
+  console.log(`🔍 Starting to fetch complete info for: "${movieTitle}"`);
+  
   try {
-    // Check cache first
-    const cached = getCachedMovie(title);
-    if (cached) {
-      return cached;
+    // Step 1: Check if we already have this movie in our cache
+    const cachedData = getMovieFromCache(movieTitle);
+    if (cachedData) {
+      console.log('⚡ Found movie in cache, returning cached data');
+      return cachedData;
     }
     
-    // Clean title for better API results
-    const cleanedTitle = cleanMovieTitle(title);
+    // Step 2: Clean up the movie title for better API results
+    const cleanTitle = cleanMovieTitle(movieTitle);
+    console.log(`🧹 Cleaned title: "${movieTitle}" → "${cleanTitle}"`);
     
-    // Get movie data from both APIs
-    const [movieData, reviewsData, detailedData] = await Promise.allSettled([
-      searchMovie(cleanedTitle),
-      getMovieReviews(cleanedTitle),
-      getDetailedMovieData(cleanedTitle)
-    ]);
+    // Step 3: Fetch data from multiple sources simultaneously
+    console.log('🚀 Fetching data from multiple sources...');
     
-    // Combine the data
-    let combinedData = movieData.status === 'fulfilled' ? movieData.value : null;
-    const reviews = reviewsData.status === 'fulfilled' ? reviewsData.value : [];
-    const detailed = detailedData.status === 'fulfilled' ? detailedData.value : {};
+    const dataPromises = [
+      fetchBasicMovieData(cleanTitle),    // Basic info from OMDb
+      fetchMovieReviews(cleanTitle),      // User reviews from TMDB
+      fetchDetailedMovieData(cleanTitle)  // Additional details from TMDB
+    ];
     
-    // If OMDb fails, try TMDB as backup
-    if (!combinedData) {
-      combinedData = await searchMovieWithTMDB(cleanedTitle);
+    // Wait for all API calls to complete (or fail)
+    const results = await Promise.allSettled(dataPromises);
+    
+    // Step 4: Process the results
+    const basicData = results[0].status === 'fulfilled' ? results[0].value : null;
+    const reviews = results[1].status === 'fulfilled' ? results[1].value : [];
+    const detailedData = results[2].status === 'fulfilled' ? results[2].value : {};
+    
+    // Step 5: If primary API failed, try backup API
+    let finalMovieData = basicData;
+    if (!finalMovieData) {
+      console.log('⚠️ Primary API failed, trying backup API...');
+      finalMovieData = await fetchMovieDataFromTMDB(cleanTitle);
     }
     
-    // Add reviews and detailed info to the movie data
-    if (combinedData) {
-      combinedData.userReviews = reviews;
-      combinedData.detailedInfo = detailed;
+    // Step 6: Combine all the data
+    if (finalMovieData) {
+      finalMovieData.userReviews = reviews;
+      finalMovieData.detailedInfo = detailedData;
+      
+      // Step 7: Save to cache for future use
+      saveMovieToCache(movieTitle, finalMovieData);
+      
+      console.log('🎉 Successfully compiled complete movie data');
+      return finalMovieData;
+    } else {
+      throw new Error('Movie not found in any database');
     }
     
-    // Cache the result
-    cacheMovie(title, combinedData);
-    
-    return combinedData;
   } catch (error) {
-    console.error('Error fetching movie info:', error);
+    console.error('💥 Error in fetchCompleteMovieInfo:', error);
     throw error;
   }
 }
 
-// Clean movie title for better API search results
+// =============================================================================
+// TITLE CLEANING - Improve movie titles for better API search results
+// =============================================================================
+
 function cleanMovieTitle(title) {
-  return title
-    .replace(/\([^)]*\)/g, '') // Remove parentheses content
-    .replace(/\[[^\]]*\]/g, '') // Remove bracket content
-    .replace(/:\s*Season\s*\d+/i, '') // Remove season info
-    .replace(/:\s*Episode\s*\d+/i, '') // Remove episode info
-    .replace(/\s+/g, ' ') // Normalize spaces
+  console.log(`🧽 Cleaning title: "${title}"`);
+  
+  let cleanedTitle = title
+    // Remove content in parentheses: "Movie Title (2021)" → "Movie Title"
+    .replace(/\([^)]*\)/g, '')
+    
+    // Remove content in square brackets: "Movie Title [HD]" → "Movie Title"
+    .replace(/\[[^\]]*\]/g, '')
+    
+    // Remove season information: "Show: Season 1" → "Show"
+    .replace(/:\s*Season\s*\d+/i, '')
+    
+    // Remove episode information: "Show: Episode 1" → "Show"
+    .replace(/:\s*Episode\s*\d+/i, '')
+    
+    // Clean up extra spaces: "Movie    Title" → "Movie Title"
+    .replace(/\s+/g, ' ')
+    
+    // Remove leading/trailing spaces
     .trim();
+  
+  console.log(`✨ Cleaned result: "${cleanedTitle}"`);
+  return cleanedTitle;
 }
 
-// Search for movie using OMDb API
-async function searchMovie(title) {
-  const url = `${OMDB_BASE_URL}?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(title)}&plot=short`;
+// =============================================================================
+// BASIC MOVIE DATA - Fetch main movie information from OMDb API
+// =============================================================================
+
+async function fetchBasicMovieData(title) {
+  console.log(`📡 Fetching basic movie data from OMDb for: "${title}"`);
   
-  const response = await fetch(url);
-  const data = await response.json();
+  try {
+    // Build the API URL
+    const apiUrl = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(title)}&plot=short`;
+    console.log('🔗 API URL:', apiUrl);
+    
+    // Make the API call
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    
+    console.log('📥 OMDb API response:', data);
+    
+    // Check if the API call was successful
+    if (data.Response === 'False') {
+      console.log('❌ OMDb exact match failed, trying search...');
+      
+      // Try searching instead of exact match
+      return await searchMovieInOMDb(title);
+    }
+    
+    console.log('✅ Successfully fetched basic movie data from OMDb');
+    return data;
+    
+  } catch (error) {
+    console.error('💥 Error fetching from OMDb:', error);
+    throw new Error(`OMDb API error: ${error.message}`);
+  }
+}
+
+// Helper function to search for movies when exact match fails
+async function searchMovieInOMDb(title) {
+  console.log(`🔍 Searching OMDb for movies matching: "${title}"`);
   
-  if (data.Response === 'False') {
-    // Try searching by title only if exact match fails
-    const searchUrl = `${OMDB_BASE_URL}?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(title)}`;
+  try {
+    // Search for movies with similar titles
+    const searchUrl = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(title)}`;
     const searchResponse = await fetch(searchUrl);
     const searchData = await searchResponse.json();
     
+    console.log('🔍 OMDb search results:', searchData);
+    
+    // Check if we found any results
     if (searchData.Response === 'True' && searchData.Search && searchData.Search.length > 0) {
-      // Get details for the first search result
+      // Get detailed info for the first (most relevant) result
       const firstResult = searchData.Search[0];
-      const detailUrl = `${OMDB_BASE_URL}?apikey=${OMDB_API_KEY}&i=${firstResult.imdbID}&plot=short`;
+      console.log('🎯 Using first search result:', firstResult.Title);
+      
+      const detailUrl = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&i=${firstResult.imdbID}&plot=short`;
       const detailResponse = await fetch(detailUrl);
       const detailData = await detailResponse.json();
       
       if (detailData.Response === 'True') {
+        console.log('✅ Successfully got details from OMDb search');
         return detailData;
       }
     }
     
-    throw new Error(data.Error || 'Movie not found');
+    throw new Error('No matching movies found in OMDb');
+    
+  } catch (error) {
+    console.error('💥 Error in OMDb search:', error);
+    throw error;
   }
+}
+
+// =============================================================================
+// MOVIE REVIEWS - Fetch user reviews from TMDB API
+// =============================================================================
+
+async function fetchMovieReviews(title) {
+  console.log(`💬 Fetching movie reviews from TMDB for: "${title}"`);
   
-  return data;
-}
-
-// Cache management
-function getCachedMovie(title) {
-  const cached = movieCache.get(title.toLowerCase());
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return cached.data;
-  }
-  return null;
-}
-
-function cacheMovie(title, data) {
-  movieCache.set(title.toLowerCase(), {
-    data: data,
-    timestamp: Date.now()
-  });
-  
-  // Limit cache size
-  if (movieCache.size > 100) {
-    const oldestKey = movieCache.keys().next().value;
-    movieCache.delete(oldestKey);
-  }
-}
-
-// Get movie reviews from TMDB
-async function getMovieReviews(title) {
   try {
-    // First, search for the movie to get its ID
-    const searchUrl = `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
-    const searchResponse = await fetch(searchUrl);
-    const searchData = await searchResponse.json();
-    
-    if (!searchData.results || searchData.results.length === 0) {
+    // Step 1: Search for the movie to get its TMDB ID
+    const movieId = await findMovieIdInTMDB(title);
+    if (!movieId) {
+      console.log('❌ Could not find movie in TMDB for reviews');
       return [];
     }
     
-    const movieId = searchData.results[0].id;
+    // Step 2: Get reviews using the movie ID
+    const reviewsUrl = `${TMDB_API_URL}/movie/${movieId}/reviews?api_key=${TMDB_API_KEY}`;
+    console.log('🔗 TMDB reviews URL:', reviewsUrl);
     
-    // Get reviews for the movie
-    const reviewsUrl = `${TMDB_BASE_URL}/movie/${movieId}/reviews?api_key=${TMDB_API_KEY}`;
-    const reviewsResponse = await fetch(reviewsUrl);
-    const reviewsData = await reviewsResponse.json();
+    const response = await fetch(reviewsUrl);
+    const data = await response.json();
     
-    if (!reviewsData.results || reviewsData.results.length === 0) {
+    console.log('📥 TMDB reviews response:', data);
+    
+    // Step 3: Process and format the reviews
+    if (!data.results || data.results.length === 0) {
+      console.log('📝 No reviews found for this movie');
       return [];
     }
     
-    // Process and return top 3 reviews
-    return reviewsData.results.slice(0, 3).map(review => ({
+    // Take the first 3 reviews and format them nicely
+    const formattedReviews = data.results.slice(0, 3).map(review => ({
       author: review.author,
-      content: truncateText(review.content, 200),
+      content: shortenText(review.content, 200), // Limit review length
       rating: review.author_details.rating || 'N/A',
       url: review.url,
       created_at: formatDate(review.created_at)
     }));
     
+    console.log(`✅ Successfully formatted ${formattedReviews.length} reviews`);
+    return formattedReviews;
+    
   } catch (error) {
-    console.error('Error fetching reviews:', error);
-    return [];
+    console.error('💥 Error fetching reviews from TMDB:', error);
+    return []; // Return empty array instead of failing completely
   }
 }
 
-// Get detailed movie data including awards and box office from TMDB
-async function getDetailedMovieData(title) {
+// =============================================================================
+// DETAILED MOVIE DATA - Fetch additional info like box office from TMDB
+// =============================================================================
+
+async function fetchDetailedMovieData(title) {
+  console.log(`💎 Fetching detailed movie data from TMDB for: "${title}"`);
+  
   try {
-    // First, search for the movie to get its ID
-    const searchUrl = `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
-    const searchResponse = await fetch(searchUrl);
-    const searchData = await searchResponse.json();
-    
-    if (!searchData.results || searchData.results.length === 0) {
+    // Step 1: Find the movie ID in TMDB
+    const movieId = await findMovieIdInTMDB(title);
+    if (!movieId) {
+      console.log('❌ Could not find movie in TMDB for detailed data');
       return {};
     }
     
-    const movieId = searchData.results[0].id;
+    // Step 2: Get detailed movie information
+    const detailUrl = `${TMDB_API_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}`;
+    console.log('🔗 TMDB detail URL:', detailUrl);
     
-    // Get detailed movie info including revenue
-    const detailUrl = `${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}`;
-    const detailResponse = await fetch(detailUrl);
-    const detailData = await detailResponse.json();
+    const response = await fetch(detailUrl);
+    const data = await response.json();
     
-    const result = {};
+    console.log('📥 TMDB detailed response:', data);
     
-    // Box office data
-    if (detailData.revenue && detailData.revenue > 0) {
-      result.boxOffice = {
-        revenue: detailData.revenue,
-        budget: detailData.budget || 0,
-        formatted: formatBoxOffice(detailData.revenue, detailData.budget)
+    // Step 3: Extract useful information
+    const detailedInfo = {};
+    
+    // Box office information
+    if (data.revenue && data.revenue > 0) {
+      detailedInfo.boxOffice = {
+        revenue: data.revenue,
+        budget: data.budget || 0,
+        formatted: formatBoxOfficeNumbers(data.revenue, data.budget)
       };
+      console.log('💰 Added box office data');
     }
     
-    // Awards data (we'll enhance OMDb awards with additional context)
-    result.popularity = detailData.popularity || 0;
-    result.voteAverage = detailData.vote_average || 0;
-    result.voteCount = detailData.vote_count || 0;
+    // Additional ratings and popularity
+    detailedInfo.popularity = data.popularity || 0;
+    detailedInfo.voteAverage = data.vote_average || 0;
+    detailedInfo.voteCount = data.vote_count || 0;
     
-    return result;
+    console.log('✅ Successfully compiled detailed movie data');
+    return detailedInfo;
     
   } catch (error) {
-    console.error('Error fetching detailed movie data:', error);
-    return {};
+    console.error('💥 Error fetching detailed data from TMDB:', error);
+    return {}; // Return empty object instead of failing completely
+  }
+}
+
+// =============================================================================
+// BACKUP API FUNCTION - Use TMDB when OMDb fails
+// =============================================================================
+
+async function fetchMovieDataFromTMDB(title) {
+  console.log(`🔄 Using TMDB as backup API for: "${title}"`);
+  
+  try {
+    // Step 1: Search for the movie
+    const movieId = await findMovieIdInTMDB(title);
+    if (!movieId) {
+      throw new Error('Movie not found in TMDB');
+    }
+    
+    // Step 2: Get detailed movie info with credits
+    const detailUrl = `${TMDB_API_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}&append_to_response=credits`;
+    const response = await fetch(detailUrl);
+    const tmdbData = await response.json();
+    
+    console.log('📥 TMDB backup data:', tmdbData);
+    
+    // Step 3: Convert TMDB format to match OMDb format (for consistency)
+    const convertedData = {
+      Title: tmdbData.title,
+      Year: tmdbData.release_date ? tmdbData.release_date.substring(0, 4) : 'N/A',
+      Rated: 'N/A', // TMDB doesn't have MPAA ratings
+      Released: tmdbData.release_date || 'N/A',
+      Runtime: tmdbData.runtime ? `${tmdbData.runtime} min` : 'N/A',
+      Genre: tmdbData.genres ? tmdbData.genres.map(g => g.name).join(', ') : 'N/A',
+      Director: extractDirectorFromCredits(tmdbData.credits),
+      Writer: 'N/A', // TMDB doesn't easily provide writer info
+      Actors: extractActorsFromCredits(tmdbData.credits),
+      Plot: tmdbData.overview || 'No plot available',
+      Language: tmdbData.original_language || 'N/A',
+      Country: tmdbData.production_countries ? 
+        tmdbData.production_countries.map(c => c.name).join(', ') : 'N/A',
+      Awards: 'N/A', // TMDB doesn't have awards info
+      Poster: tmdbData.poster_path ? 
+        `https://image.tmdb.org/t/p/w300${tmdbData.poster_path}` : 'N/A',
+      Ratings: [
+        {
+          Source: 'TMDB',
+          Value: tmdbData.vote_average ? `${tmdbData.vote_average}/10` : 'N/A'
+        }
+      ],
+      Metascore: 'N/A',
+      imdbRating: tmdbData.vote_average ? tmdbData.vote_average.toFixed(1) : 'N/A',
+      imdbVotes: tmdbData.vote_count ? tmdbData.vote_count.toLocaleString() : 'N/A',
+      imdbID: tmdbData.imdb_id || 'N/A',
+      Type: 'movie',
+      DVD: 'N/A',
+      BoxOffice: tmdbData.revenue ? formatSimpleBoxOffice(tmdbData.revenue) : 'N/A',
+      Production: tmdbData.production_companies ? 
+        tmdbData.production_companies.map(c => c.name).join(', ') : 'N/A',
+      Website: tmdbData.homepage || 'N/A',
+      Response: 'True'
+    };
+    
+    console.log('✅ Successfully converted TMDB data to OMDb format');
+    return convertedData;
+    
+  } catch (error) {
+    console.error('💥 Error using TMDB as backup:', error);
+    throw error;
+  }
+}
+
+// =============================================================================
+// HELPER FUNCTIONS - Small utilities used throughout the script
+// =============================================================================
+
+// Find a movie's TMDB ID by searching for its title
+async function findMovieIdInTMDB(title) {
+  console.log(`🔍 Searching for "${title}" in TMDB...`);
+  
+  try {
+    const searchUrl = `${TMDB_API_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+    
+    if (data.results && data.results.length > 0) {
+      const movieId = data.results[0].id;
+      console.log(`✅ Found movie ID: ${movieId}`);
+      return movieId;
+    }
+    
+    console.log('❌ Movie not found in TMDB search');
+    return null;
+    
+  } catch (error) {
+    console.error('💥 Error searching TMDB:', error);
+    return null;
+  }
+}
+
+// Shorten long text to a specified length
+function shortenText(text, maxLength) {
+  if (!text || text.length <= maxLength) return text;
+  return text.substring(0, maxLength).trim() + '...';
+}
+
+// Format dates into a readable format
+function formatDate(dateString) {
+  if (!dateString) return 'Unknown date';
+  
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  } catch (error) {
+    return 'Unknown date';
   }
 }
 
 // Format box office numbers into readable format
-function formatBoxOffice(revenue, budget = 0) {
+function formatBoxOfficeNumbers(revenue, budget = 0) {
   const formatMoney = (amount) => {
     if (amount >= 1000000000) {
-      return `${(amount / 1000000000).toFixed(1)}B`;
+      return `$${(amount / 1000000000).toFixed(1)}B`;
     } else if (amount >= 1000000) {
-      return `${(amount / 1000000).toFixed(0)}M`;
+      return `$${(amount / 1000000).toFixed(0)}M`;
     } else {
-      return `${amount.toLocaleString()}`;
+      return `$${amount.toLocaleString()}`;
     }
   };
   
   let result = `${formatMoney(revenue)} worldwide`;
   
   if (budget > 0) {
-    const profit = revenue - budget;
     const profitMultiplier = (revenue / budget).toFixed(1);
     result += ` (${profitMultiplier}x budget)`;
   }
@@ -235,155 +457,94 @@ function formatBoxOffice(revenue, budget = 0) {
   return result;
 }
 
-// Enhanced awards parsing
-function parseAwards(awardsString) {
-  if (!awardsString || awardsString === 'N/A') {
+// Simple box office formatting for backup API
+function formatSimpleBoxOffice(revenue) {
+  if (revenue >= 1000000000) {
+    return `$${(revenue / 1000000000).toFixed(1)} billion`;
+  } else if (revenue >= 1000000) {
+    return `$${(revenue / 1000000).toFixed(0)} million`;
+  } else {
+    return `$${revenue.toLocaleString()}`;
+  }
+}
+
+// Extract director name from TMDB credits
+function extractDirectorFromCredits(credits) {
+  if (!credits || !credits.crew) return 'N/A';
+  
+  const director = credits.crew.find(person => person.job === 'Director');
+  return director ? director.name : 'N/A';
+}
+
+// Extract main actors from TMDB credits
+function extractActorsFromCredits(credits) {
+  if (!credits || !credits.cast) return 'N/A';
+  
+  // Get the first 3 actors
+  const mainActors = credits.cast.slice(0, 3).map(actor => actor.name);
+  return mainActors.length > 0 ? mainActors.join(', ') : 'N/A';
+}
+
+// =============================================================================
+// CACHE MANAGEMENT FUNCTIONS - Store and retrieve movie data
+// =============================================================================
+
+// Get movie data from cache if it exists and isn't expired
+function getMovieFromCache(title) {
+  const cacheKey = title.toLowerCase();
+  const cachedItem = movieDataCache.get(cacheKey);
+  
+  if (!cachedItem) {
+    console.log('📭 No cached data found');
     return null;
   }
   
-  const awards = [];
-  
-  // Parse Oscar wins
-  const oscarWins = awardsString.match(/Won (\d+) Oscar/i);
-  if (oscarWins) {
-    awards.push({
-      type: 'Oscar',
-      status: 'Won',
-      count: parseInt(oscarWins[1]),
-      display: `🏆 ${oscarWins[1]} Oscar${oscarWins[1] > 1 ? 's' : ''}`
-    });
+  // Check if cached data is still valid (not expired)
+  const timeElapsed = Date.now() - cachedItem.timestamp;
+  if (timeElapsed > CACHE_EXPIRY_TIME) {
+    console.log('⏰ Cached data is expired, removing from cache');
+    movieDataCache.delete(cacheKey);
+    return null;
   }
   
-  // Parse Oscar nominations
-  const oscarNoms = awardsString.match(/Nominated for (\d+) Oscar/i);
-  if (oscarNoms && !oscarWins) {
-    awards.push({
-      type: 'Oscar',
-      status: 'Nominated',
-      count: parseInt(oscarNoms[1]),
-      display: `🎬 ${oscarNoms[1]} Oscar nomination${oscarNoms[1] > 1 ? 's' : ''}`
-    });
-  }
-  
-  // Parse Golden Globe wins
-  const ggWins = awardsString.match(/Won (\d+) Golden Globe/i);
-  if (ggWins) {
-    awards.push({
-      type: 'Golden Globe',
-      status: 'Won',
-      count: parseInt(ggWins[1]),
-      display: `🌟 ${ggWins[1]} Golden Globe${ggWins[1] > 1 ? 's' : ''}`
-    });
-  }
-  
-  // Parse BAFTA wins
-  const baftaWins = awardsString.match(/Won (\d+) BAFTA/i);
-  if (baftaWins) {
-    awards.push({
-      type: 'BAFTA',
-      status: 'Won',
-      count: parseInt(baftaWins[1]),
-      display: `🎭 ${baftaWins[1]} BAFTA${baftaWins[1] > 1 ? 's' : ''}`
-    });
-  }
-  
-  // Catch-all for other wins
-  const otherWins = awardsString.match(/Won (\d+) wins?/i);
-  if (otherWins && awards.length === 0) {
-    awards.push({
-      type: 'Various',
-      status: 'Won',
-      count: parseInt(otherWins[1]),
-      display: `🏅 ${otherWins[1]} award${otherWins[1] > 1 ? 's' : ''}`
-    });
-  }
-  
-  return awards.length > 0 ? awards : null;
+  console.log('⚡ Using cached data (age: ' + Math.round(timeElapsed / 1000 / 60) + ' minutes)');
+  return cachedItem.data;
 }
 
-// Helper function to truncate long review text
-function truncateText(text, maxLength) {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength).trim() + '...';
-}
-
-// Helper function to format date
-function formatDate(dateString) {
-  if (!dateString) return 'Unknown date';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
+// Save movie data to cache
+function saveMovieToCache(title, data) {
+  const cacheKey = title.toLowerCase();
+  
+  movieDataCache.set(cacheKey, {
+    data: data,
+    timestamp: Date.now()
   });
-}
-
-// Alternative API function using The Movie Database (TMDB) as backup
-async function searchMovieWithTMDB(title) {
-  try {
-    // Search for movie
-    const searchUrl = `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
-    const response = await fetch(searchUrl);
-    const data = await response.json();
-    
-    if (data.results && data.results.length > 0) {
-      const movie = data.results[0];
-      
-      // Get additional details
-      const detailUrl = `${TMDB_BASE_URL}/movie/${movie.id}?api_key=${TMDB_API_KEY}&append_to_response=credits,keywords`;
-      const detailResponse = await fetch(detailUrl);
-      const details = await detailResponse.json();
-      
-      // Convert TMDB format to OMDb-like format for consistency
-      return {
-        Title: details.title,
-        Year: details.release_date ? details.release_date.substring(0, 4) : 'N/A',
-        Rated: 'N/A', // TMDB doesn't provide MPAA ratings
-        Released: details.release_date || 'N/A',
-        Runtime: details.runtime ? `${details.runtime} min` : 'N/A',
-        Genre: details.genres ? details.genres.map(g => g.name).join(', ') : 'N/A',
-        Director: details.credits && details.credits.crew ? 
-          details.credits.crew.find(c => c.job === 'Director')?.name || 'N/A' : 'N/A',
-        Writer: 'N/A',
-        Actors: details.credits && details.credits.cast ? 
-          details.credits.cast.slice(0, 3).map(a => a.name).join(', ') : 'N/A',
-        Plot: details.overview || 'No plot available',
-        Language: details.original_language || 'N/A',
-        Country: details.production_countries ? 
-          details.production_countries.map(c => c.name).join(', ') : 'N/A',
-        Awards: 'N/A',
-        Poster: details.poster_path ? 
-          `https://image.tmdb.org/t/p/w300${details.poster_path}` : 'N/A',
-        Ratings: [
-          {
-            Source: 'TMDB',
-            Value: details.vote_average ? `${details.vote_average}/10` : 'N/A'
-          }
-        ],
-        Metascore: 'N/A',
-        imdbRating: details.vote_average ? details.vote_average.toFixed(1) : 'N/A',
-        imdbVotes: details.vote_count ? details.vote_count.toLocaleString() : 'N/A',
-        imdbID: details.imdb_id || 'N/A',
-        Type: 'movie',
-        DVD: 'N/A',
-        BoxOffice: details.revenue ? `${details.revenue.toLocaleString()}` : 'N/A',
-        Production: details.production_companies ? 
-          details.production_companies.map(c => c.name).join(', ') : 'N/A',
-        Website: details.homepage || 'N/A',
-        Response: 'True'
-      };
-    }
-    
-    throw new Error('Movie not found in TMDB');
-  } catch (error) {
-    console.error('TMDB API error:', error);
-    throw error;
+  
+  console.log(`💾 Saved "${title}" to cache`);
+  
+  // Keep cache size under control
+  if (movieDataCache.size > MAX_CACHE_SIZE) {
+    // Remove the oldest item (first one added)
+    const oldestKey = movieDataCache.keys().next().value;
+    movieDataCache.delete(oldestKey);
+    console.log('🧹 Removed oldest item from cache to keep size under control');
   }
 }
 
-// Initialize extension
+// =============================================================================
+// EXTENSION INITIALIZATION - Set up the extension when it starts
+// =============================================================================
+
+// This runs when the extension is first installed or updated
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
-    console.log('Netflix Movie Info Extension installed - ready to use!');
+    console.log('🎉 Netflix Movie Info Extension installed successfully!');
+    console.log('🎬 Ready to fetch movie information!');
+  } else if (details.reason === 'update') {
+    console.log('🔄 Netflix Movie Info Extension updated!');
   }
+  
+  // Clear old cache on install/update
+  movieDataCache.clear();
+  console.log('🧹 Cache cleared for fresh start');
 });
