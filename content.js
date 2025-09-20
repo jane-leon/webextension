@@ -94,12 +94,7 @@ function findNetflixModalElement(startingElement) {
     '[class*="previewModal"]',        // Any preview modal variant
     '.about-wrapper',                 // About sections in modals
     '.about-header',                  // About section headers
-    '[data-uia*="preview"]',          // Any preview-related elements
-    '.title-card',                    // Some title cards (backup)
-    '.slider-item',                   // Movies in horizontal sliders (backup)
-    '.titleCard',                     // Alternative title card class (backup)
-    '[data-uia="title-card"]',        // Cards with data attributes (backup)
-    '.bob-card'                       // "Bigger" card format (backup)
+    '[data-uia*="preview"]'          // Any preview-related elements
   ];
   
   // Check each selector to see if our element matches
@@ -107,7 +102,6 @@ function findNetflixModalElement(startingElement) {
     // .closest() looks at the element and all its parent elements
     const foundElement = startingElement.closest(selector);
     if (foundElement) {
-      console.log(`📍 Found Netflix modal using selector: ${selector}`);
       return foundElement;
     }
   }
@@ -121,7 +115,7 @@ function findNetflixModalElement(startingElement) {
 // =============================================================================
 
 function extractMovieTitle(modalElement) {
-  console.log('🔍 Trying to extract movie title from Netflix modal...');
+  // console.log('🔍 Trying to extract movie title from Netflix modal...');
   
   let movieTitle = null;
   
@@ -130,42 +124,24 @@ function extractMovieTitle(modalElement) {
   const modalTitle = modalElement.querySelector('.previewModal--section-header strong');
   if (modalTitle) {
     movieTitle = modalTitle.textContent.trim();
-    console.log('✅ Found title in modal About section header:', movieTitle);
+
   }
   
-
-
   
   // Clean up the title and return it
   return cleanupMovieTitle(movieTitle);
 }
 
-// // Helper function to check if text looks like UI text rather than a movie title
-// function isUIText(text) {
-//   const uiTexts = ['Play', 'Add to List', 'More Info', 'Watch Now', 'New', 'Popular', 'Trending'];
-//   return uiTexts.some(uiText => text.toLowerCase().includes(uiText.toLowerCase()));
-// }
 
 // Helper function to clean up extracted movie titles
 function cleanupMovieTitle(title) {
   if (!title) {
-    console.log('❌ No title found');
+    // console.log('❌ No title found');
     return null;
   }
-  
-  // Remove common Netflix UI text
-  title = title.replace(/^(Play|Add to List|More Info|Watch Now)/i, '');
   
   // Clean up extra spaces
   title = title.replace(/\s+/g, ' ').trim();
-  
-  // Make sure it's long enough to be a real title
-  if (title.length < 2) {
-    console.log('❌ Title too short:', title);
-    return null;
-  }
-  
-  console.log('✅ Cleaned title:', title);
   return title;
 }
 
