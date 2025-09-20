@@ -7,6 +7,9 @@ const OMDB_API_URL = 'https://www.omdbapi.com/';
 const TMDB_API_KEY = '3126e89bfccb852840b00afa13857781';
 const TMDB_API_URL = 'https://api.themoviedb.org/3';
 
+const GEMINI_API_KEY = 'AIzaSyCVftdUFa2Dc88-VmFg9phUGAqRd2o8GLU'; 
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+
 // Create a cache to store movie data (like a dictionary/map)
 const movieDataCache = new Map();
 const CACHE_EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
@@ -41,7 +44,8 @@ async function fetchCompleteMovieInfo(movieTitle) {
     const dataPromises = [
       fetchBasicMovieData(cleanTitle),
       fetchMovieReviews(cleanTitle),
-      fetchDetailedMovieData(cleanTitle)
+      fetchDetailedMovieData(cleanTitle),
+      fetchMovieFunFact(cleanTitle, '') 
     ];
 
     const results = await Promise.allSettled(dataPromises);
@@ -49,6 +53,7 @@ async function fetchCompleteMovieInfo(movieTitle) {
     const basicData = results[0].status === 'fulfilled' ? results[0].value : null;
     const reviews = results[1].status === 'fulfilled' ? results[1].value : [];
     const detailedData = results[2].status === 'fulfilled' ? results[2].value : {};
+    const funFact = results[3].status === 'fulfilled' ? results[3].value : null;
 
     // If OMDB fails or is missing some info, try TMDB (alternative API)
     let finalMovieData = basicData;
@@ -59,6 +64,7 @@ async function fetchCompleteMovieInfo(movieTitle) {
     if (finalMovieData) {
       finalMovieData.userReviews = reviews;
       finalMovieData.detailedInfo = detailedData;
+      finalMovieData.funFact = funFact; 
 
       // Save to cache for future use (prevents stack overflow from calling API too frequently)
       saveMovieToCache(movieTitle, finalMovieData);
@@ -303,7 +309,38 @@ function formatSimpleBoxOffice(revenue) {
   }
 }
 
-
+// GEMIINI MAGIC
+async function fetchMovieFunFact(movieTitle, movieYear) {
+  try {
+    const prompt = `Give me one interesting, fun fact about the movie "${movieTitle}" (${movieYear}). 
+    Keep it short (2-3 sentences), spoiler-free, and focus on behind-the-scenes trivia, cast facts, or
+    production details. Don't reveal plot points.`;
+    
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }]
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+      return data.candidates[0].content.parts[0].text;
+    }
+    
+    return null;
+  } catch (error) {
+    return null; // Fail silently, don't break the extension
+  }
+}
 // =============================================================================
 // CACHE MANAGEMENT FUNCTIONS - Store and retrieve movie data
 // =============================================================================
