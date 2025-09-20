@@ -1,6 +1,5 @@
 // This script runs on Netflix pages and detects when users open movie details
 // It creates a sidebar that shows movie information when in the "About" section
-
 let movieInfoSidebar = null;          // Will hold our sidebar element
 let currentMovieElement = null;       // Tracks which movie modal we're viewing
 // let detectionDelayTimer = null;       // Timer to prevent too many API calls - COMMENTED OUT
@@ -38,9 +37,7 @@ function buildMovieInfoSidebar() {
 
 }
 
-
 // Listen for when users open Netflix movie about page
-
 function setupModalDetection() {
   document.addEventListener('mouseover', handleMouseEnterElement);
   document.addEventListener('mouseout', handleMouseLeaveElement);
@@ -53,10 +50,9 @@ function handleMouseEnterElement(event) {
   if (modalElement && modalElement !== currentMovieElement) {
     currentMovieElement = modalElement;
 
-    // Load movie information immediately - NO DELAY
     loadMovieInformation(modalElement);
 
-    // COMMENTED OUT - Timer-based approach:
+    // Timer-based approach:
     // Don't fetch data immediately - wait a bit to see if user is still in modal
     // clearTimeout(detectionDelayTimer);
     // detectionDelayTimer = setTimeout(() => {
@@ -80,37 +76,29 @@ function handleMouseLeaveElement(event) {
   }
 }
 
-
 // Find movie modal elements (About sections)
-
 function findNetflixModalElement(startingElement) {
 
   const netflixModalSelectors = [
-    '.previewModal',                  // Main preview modal container
-    '[class*="previewModal"]',        // Any preview modal variant
-    '.about-wrapper',                 // About sections in modals
-    '.about-header',                  // About section headers
-    '[data-uia*="preview"]'          // Any preview-related elements
+    '.previewModal',                 
+    '[class*="previewModal"]',        
+    '.about-wrapper',
+    '.about-header',                  
+    '[data-uia*="preview"]'         
   ];
 
   // Check each selector to see if our element matches
   for (let selector of netflixModalSelectors) {
-    // .closest() looks at the element and all its parent elements
     const foundElement = startingElement.closest(selector);
     if (foundElement) {
-
       return foundElement;
     }
   }
-
-  // No modal element found
   return null;
 }
 
 // Title extraction, get movie name from Netflix's modal about section
-
 function extractMovieTitle(modalElement) {
-
   let movieTitle = null;
   const modalTitle = modalElement.querySelector('.previewModal--section-header strong');
   if (modalTitle) {
@@ -130,12 +118,8 @@ function cleanupMovieTitle(title) {
 }
 
 /* Get movie/show data and display it */
-
 async function loadMovieInformation(modalElement) {
-
-  // Extract the movie title from the modal HTML element
   const movieTitle = extractMovieTitle(modalElement);
-
   if (!movieTitle) {
     return;
   }
@@ -143,7 +127,6 @@ async function loadMovieInformation(modalElement) {
   showLoadingMessage(movieTitle);
 
   try {
-
     const response = await chrome.runtime.sendMessage({
       action: 'getMovieInfo',    // Tell background script what we want
       title: movieTitle          // Send the movie title
@@ -161,7 +144,6 @@ async function loadMovieInformation(modalElement) {
 }
 
 /* Extension sidebar: show/hide extension & content */
-
 function showSidebar() {
   if (movieInfoSidebar) {
     movieInfoSidebar.classList.remove('hidden');
@@ -185,7 +167,6 @@ function showLoadingMessage(movieTitle) {
   `;
 }
 
-//CHANGED: error message. used to be an emoji, and I changed it to a text message.
 function showErrorMessage(errorText) {
   const contentArea = movieInfoSidebar.querySelector('.sidebar-content');
   contentArea.innerHTML = `
@@ -196,13 +177,10 @@ function showErrorMessage(errorText) {
   `;
 }
 
-/* Content: Format & show movie/show info */
-
+/* Format & show movie/show info */
 function displayMovieInformation(movieData) {
-
   const contentArea = movieInfoSidebar.querySelector('.sidebar-content');
-
-  // Build the HTML for movie information
+  // Building the HTML for movie information
   contentArea.innerHTML = `
     <div class="movie-info">
       ${buildMoviePosterSection(movieData)}
@@ -216,10 +194,8 @@ function displayMovieInformation(movieData) {
 }
 
 // Helper functions to build info sections
-
 function buildMoviePosterSection(movieData) {
   const posterUrl = movieData.Poster !== 'N/A' ? movieData.Poster : 'https://via.placeholder.com/150x225?text=No+Image';
-
   return `
     <div class="movie-poster">
       <img src="${posterUrl}" alt="${movieData.Title}" 
@@ -239,24 +215,22 @@ function buildMovieDetailsSection(movieData) {
 
 function buildRatingsSection(movieData) {
   let ratingsHTML = '<div class="ratings">';
-
   // IMDb rating
   if (movieData.imdbRating !== 'N/A') {
     ratingsHTML += `
       <div class="rating">
-        <span class="rating-label">IMDb</span>
+        <span class="rating-label">🎥 IMDb</span>
         <span class="rating-value">${movieData.imdbRating}/10</span>
       </div>
     `;
   }
-
   // Rotten Tomatoes rating
   if (movieData.Ratings) {
     const rtRating = movieData.Ratings.find(r => r.Source === 'Rotten Tomatoes');
     if (rtRating) {
       ratingsHTML += `
         <div class="rating">
-          <span class="rating-label">RT</span>
+          <span class="rating-label">🍅 RT</span>
           <span class="rating-value">${rtRating.Value}</span>
         </div>
       `;
@@ -271,7 +245,6 @@ function buildAwardsSection(movieData) {
   if (!movieData.Awards || movieData.Awards === 'N/A') {
     return '';
   }
-
   return `
     <div class="movie-awards">
       <h5>Awards 🏆</h5>
@@ -284,7 +257,6 @@ function buildBoxOfficeSection(movieData) {
   if (!movieData.detailedInfo || !movieData.detailedInfo.boxOffice) {
     return '';
   }
-
   return `
     <div class="box-office">
       <h5>Box Office 💸</h5>
@@ -297,7 +269,6 @@ function buildReviewsSection(movieData) {
   if (!movieData.userReviews || movieData.userReviews.length === 0) {
     return '';
   }
-
   let reviewsHTML = `
     <div class="movie-reviews">
       <h5>Reviews from other watchers 👥</h5>
@@ -321,15 +292,12 @@ function buildReviewsSection(movieData) {
 }
 
 /* Restart extension when user scrolls on Netflix */
-
 let currentPageUrl = location.href;
-
 // Watch changes to page content
 const pageObserver = new MutationObserver(() => {
   const newUrl = location.href;
   if (newUrl !== currentPageUrl) {
     currentPageUrl = newUrl;
-
     // Wait a bit for Netflix to load the new content, then restart
     setTimeout(startExtension, 1500);
   }
@@ -342,7 +310,6 @@ pageObserver.observe(document, {
 });
 
 /* Load extension */
-
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', startExtension);
 } else {
