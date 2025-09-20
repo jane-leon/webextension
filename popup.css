@@ -13,7 +13,6 @@ body {
   font-family: var(--font);
   background: var(--bkg-color);
   position: relative;
-  /* color: white; */
 }
 
 /* Formatting for title banner on web extension instructions */
@@ -21,9 +20,6 @@ body {
   padding: 20px 20px 10px;
   text-align: center;
   display: flex;
-  /* color: var(--medium-color); */
-  /* background-color: white; */
-  /* backdrop-filter: blur(10px); */
 }
 
 .header img {
@@ -37,18 +33,14 @@ body {
   color: black;
 }
 
-/* DOES THIS EXIST?? */
-/* .header p {
-  margin: 0;
-  opacity: 0.9;
-  font-size: 14px;
-} */
+h4{
+  color: var(--text-color);
+}
 
 /* Formatting for instructions to use */
 .content {
   padding: 3px 24px 24px;
-  /* background: var(--bkg-color); */
-  color: var(#333);
+  color: var(--text-color);
 }
 
 .features{
@@ -60,7 +52,6 @@ body {
 
 .features h4 {
   margin: 20px 0 0 12px; 
-  color: #2c3e50;
   font-size: 14px;
 }
 
@@ -68,8 +59,7 @@ body {
 .feature-list {
   list-style: circle;
   padding: 0;
-  /* margin-top: 5px; */
-  /* margin-bottom: 16px; */
+
 }
 
 .feature-list ul {
@@ -80,18 +70,14 @@ body {
 }
 
 .feature-list li {
-  /* padding: 5px 57px 0px 15px; */
   padding-left: 15px;
-  /* font-size: 14px; */
   display: flex;
   align-items: center;
   width: 100%;
 }
 
-/* optional idea: make custom bullet point? */
 .feature-list li:before {
   content: "➯";
-  color: var(--text-color);
   font-weight: bold;
   margin-right: 8px;
   font-size: 17px;
@@ -109,7 +95,6 @@ body {
 
 .instructions h4 {
   margin: 0 0 8px 0;
-  color: #495057;
   font-size: 14px;
 }
 
@@ -124,15 +109,6 @@ body {
   margin-bottom: 4px;
 }
 
-/* I THINK THIS ELEMENT DOESN'T EXIST ANYMORE */
-/* .highlight {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 600;
-} */
-
 /* "Blurry dot" effect at the top of the sidebar*/
 .color {
   height: 500px;
@@ -143,21 +119,3 @@ body {
   left: -16%;
   z-index: -1;
 }
-
-/* .rounded-outline-box {
-  /* Box dimensions and background (optional) */
-  /* width: 200px;
-  height: 100px;
-  top: 300px;
-  left: -13%;
-   */
-  /* Apply border-radius to the element itself */
-  /* border-radius: 15px; Adjust the value for desired roundness */
-  
-  /* Apply the outline */
-  /* outline: 2px solid darkblue; Adjust width, style, and color as needed */
-  
-  /* Optional: Adjust the space between the element and the outline */
-  /* outline-offset: 5px; Positive values move the outline outwards */
-  /* z-index: 1; */
-/* } */ 
