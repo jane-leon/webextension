@@ -308,7 +308,7 @@ function formatSimpleBoxOffice(revenue) {
   }
 }
 
-// GEMIINI MAGIC
+// GEMIINI MAGIC !!!
 async function fetchMovieFunFact(movieTitle, movieYear) {
   
   try {
@@ -343,11 +343,8 @@ async function fetchMovieFunFact(movieTitle, movieYear) {
     return null;
   }
 }
-// =============================================================================
-// CACHE MANAGEMENT FUNCTIONS - Store and retrieve movie data
-// =============================================================================
 
-// Get movie data from cache if it exists and isn't expired
+/* Function to fetch movie data and store it to avoid overflowing with too many API calls */
 function getMovieFromCache(title) {
   const cacheKey = title.toLowerCase();
   const cachedItem = movieDataCache.get(cacheKey);
@@ -356,7 +353,7 @@ function getMovieFromCache(title) {
     return null;
   }
 
-  // Check if cached data is still valid (not expired)
+  // Make sure cached data is not expired
   const timeElapsed = Date.now() - cachedItem.timestamp;
   if (timeElapsed > CACHE_EXPIRY_TIME) {
     movieDataCache.delete(cacheKey);
