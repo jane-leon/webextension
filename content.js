@@ -7,31 +7,20 @@ let movieInfoSidebar = null;          // Will hold our sidebar element
 let currentMovieElement = null;       // Tracks which movie modal we're viewing
 let detectionDelayTimer = null;       // Timer to prevent too many API calls
 
-// =============================================================================
-// MAIN INITIALIZATION - This runs when the page loads
-// =============================================================================
-
 function startExtension() {
-  console.log('🎬 Netflix Movie Info Extension is starting...');
-
   buildMovieInfoSidebar();
   setupModalDetection();
-  console.log('✅ Extension is ready! Click "More Info" on movies to see details.');
 }
 
-// =============================================================================
-// SIDEBAR CREATION - Build the info panel that will show movie details
-// =============================================================================
 
 function buildMovieInfoSidebar() {
   if (movieInfoSidebar) return;
-  
-  console.log('🔨 Building movie info sidebar...');
+
   movieInfoSidebar = document.createElement('div');
   movieInfoSidebar.id = 'movie-info-sidebar';
   movieInfoSidebar.className = 'movie-info-sidebar hidden'; // Start hidden
   
-  // Build the HTML structure for our sidebar
+  //HTML structure for our sidebar
   movieInfoSidebar.innerHTML = `
     <div class="sidebar-header">
       <h3>🎬 Movie Info</h3>
@@ -50,13 +39,9 @@ function buildMovieInfoSidebar() {
   // Make the close button work
   const closeButton = movieInfoSidebar.querySelector('.close-btn');
   closeButton.addEventListener('click', hideSidebar);
-  
-  console.log('✅ Sidebar created successfully!');
 }
 
-// =============================================================================
-// MODAL DETECTION - Listen for when users open Netflix movie modals
-// =============================================================================
+//  Listen for when users open Netflix movie about page
 
 function setupModalDetection() {
   console.log('👀 Setting up Netflix modal detection...');
