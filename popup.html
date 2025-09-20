@@ -1,6 +1,145 @@
 <!DOCTYPE html>
-<html>
-  <body>
-    <script src="popup.js"></script>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netflix Movie Info</title>
+  <style>
+    body {
+      width: 350px;
+      padding: 0;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .header {
+      padding: 20px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+    
+    .header h1 {
+      margin: 0 0 8px 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    
+    .header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 14px;
+    }
+    
+    .content {
+      padding: 24px;
+      background: white;
+      color: #333;
+    }
+    
+    .status {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0;
+    }
+    
+    .feature-list li {
+      padding: 8px 0;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .feature-list li:before {
+      content: "✓";
+      color: #28a745;
+      font-weight: bold;
+      margin-right: 8px;
+    }
+    
+    .instructions {
+      background: #f8f9fa;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+    
+    .instructions h4 {
+      margin: 0 0 8px 0;
+      color: #495057;
+      font-size: 14px;
+    }
+    
+    .instructions ol {
+      margin: 0;
+      padding-left: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    
+    .instructions li {
+      margin-bottom: 4px;
+    }
+    
+    .highlight {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎬 Netflix Movie Info</h1>
+    <p>Instant movie ratings & reviews</p>
+  </div>
+  
+  <div class="content">
+    <div class="status">
+      ✅ Ready to use! No setup required.
+    </div>
+    
+    <div class="instructions">
+      <h4>🚀 How to use:</h4>
+      <ol>
+        <li>Navigate to <span class="highlight">Netflix.com</span></li>
+        <li>Hover over any movie poster</li>
+        <li>Wait for the info panel to appear</li>
+        <li>View ratings, awards & reviews!</li>
+      </ol>
+    </div>
+    
+    <h3 style="margin: 20px 0 12px 0; color: #2c3e50; font-size: 16px;">✨ What you'll see:</h3>
+    <ul class="feature-list">
+      <li>IMDb & Rotten Tomatoes ratings</li>
+      <li>🏆 Awards & recognition info</li>
+      <li>💰 Box office performance</li>
+      <li>👥 Top 3 user reviews</li>
+      <li>Cast, director & plot info</li>
+    </ul>
+    
+    <div class="instructions">
+      <h4>💡 Pro tip:</h4>
+      <p style="margin: 0; font-size: 13px; line-height: 1.5;">
+        Try hovering over popular movies like "Inception," "Avengers," or Oscar winners to see the full feature set in action!
+      </p>
+    </div>
+  </div>
+</body>
 </html>

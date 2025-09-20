@@ -1,36 +1,36 @@
 {
   "manifest_version": 3,
-  "name": "Web Extension",
+  "name": "Netflix Movie Info",
   "version": "1.0",
-  "description": "Web extension displaying movie and tv show ratings on streaming services.",
-
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  },
-
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png"
-    }
-  },
-
+  "description": "Get IMDb ratings, keywords, and reviews for Netflix movies",
+  
   "permissions": [
-    "activeTab",
-    "scripting"
+    "activeTab"
   ],
-
+  
+  "host_permissions": [
+    "https://www.netflix.com/*",
+    "https://www.omdbapi.com/*",
+    "https://api.themoviedb.org/*"
+  ],
+  
+  "content_scripts": [{
+    "matches": ["https://www.netflix.com/*"],
+    "js": ["content.js"],
+    "css": ["sidebar.css"]
+  }],
+  
   "background": {
     "service_worker": "background.js"
   },
-
-  "content_scripts": [
-    {
-      "matches": ["https://*/*", "http://*/*"],
-      "js": ["content.js"]
-    }
-  ]
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Netflix Movie Info"
+  },
+  
+  "web_accessible_resources": [{
+    "resources": ["sidebar.html"],
+    "matches": ["https://www.netflix.com/*"]
+  }]
 }

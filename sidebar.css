@@ -1,0 +1,338 @@
+/* Netflix Movie Info Sidebar Styles */
+.movie-info-sidebar {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 350px;
+    max-height: 80vh;
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    z-index: 999999;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+  
+  .movie-info-sidebar.hidden {
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .sidebar-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .sidebar-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+  }
+  
+  .close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .sidebar-content {
+    padding: 20px;
+    max-height: calc(80vh - 60px);
+    overflow-y: auto;
+  }
+  
+  .loading {
+    text-align: center;
+    color: #666;
+    padding: 40px 20px;
+  }
+  
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .movie-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .movie-poster {
+    text-align: center;
+  }
+  
+  .movie-poster img {
+    max-width: 120px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .movie-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .movie-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.3;
+  }
+  
+  .movie-year {
+    color: #7f8c8d;
+    font-weight: 500;
+  }
+  
+  .ratings {
+    display: flex;
+    gap: 16px;
+    margin: 8px 0;
+  }
+  
+  .rating {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 8px;
+    min-width: 60px;
+  }
+  
+  .rating-label {
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  
+  .rating-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2c3e50;
+  }
+  
+  .movie-genre,
+  .movie-plot,
+  .movie-director,
+  .movie-actors {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  
+  .movie-genre strong,
+  .movie-plot strong,
+  .movie-director strong,
+  .movie-actors strong {
+    color: #495057;
+    font-weight: 600;
+  }
+  
+  .movie-plot {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #667eea;
+  }
+  
+  .error {
+    text-align: center;
+    color: #dc3545;
+    padding: 20px;
+  }
+  
+  .error p {
+    margin: 8px 0;
+  }
+  
+  /* Movie awards section */
+  .movie-awards {
+    margin: 12px 0;
+    padding: 12px;
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .movie-awards h5 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #8b4513;
+  }
+  
+  .awards-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+  }
+  
+  .award-badge {
+    background: rgba(139, 69, 19, 0.1);
+    color: #8b4513;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid rgba(139, 69, 19, 0.2);
+  }
+  
+  /* Box office section */
+  .box-office {
+    margin: 12px 0;
+    padding: 12px;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-radius: 8px;
+    text-align: center;
+    color: white;
+  }
+  
+  .box-office h5 {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.9;
+  }
+  
+  .box-office-amount {
+    font-size: 16px;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Movie reviews section */
+  .movie-reviews {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e9ecef;
+  }
+  
+  .movie-reviews h5 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+  }
+  
+  .review-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-left: 3px solid #667eea;
+    transition: transform 0.2s ease;
+  }
+  
+  .review-item:hover {
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .review-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .review-author {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 13px;
+  }
+  
+  .review-rating {
+    background: #fff3cd;
+    color: #856404;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  
+  .review-content {
+    font-size: 12px;
+    line-height: 1.4;
+    color: #495057;
+    margin-bottom: 6px;
+    text-align: left;
+  }
+  
+  .review-date {
+    font-size: 11px;
+    color: #6c757d;
+    text-align: right;
+    font-style: italic;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .movie-info-sidebar {
+      width: 320px;
+      right: 10px;
+      top: 10px;
+    }
+  }
+  
+  /* Scrollbar styling */
+  .sidebar-content::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .sidebar-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  .sidebar-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+  }
+  
+  .sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
