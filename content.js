@@ -116,9 +116,6 @@ function extractMovieTitle(modalElement) {
   if (modalTitle) {
     movieTitle = modalTitle.textContent.trim();
   }
-
-
-
   // Clean up the title and return it
   return cleanupMovieTitle(movieTitle);
 }
@@ -142,8 +139,6 @@ async function loadMovieInformation(modalElement) {
   if (!movieTitle) {
     return;
   }
-
-  // Show the sidebar with a loading message
   showSidebar();
   showLoadingMessage(movieTitle);
 
@@ -153,9 +148,6 @@ async function loadMovieInformation(modalElement) {
       action: 'getMovieInfo',    // Tell background script what we want
       title: movieTitle          // Send the movie title
     });
-
-
-    // Check if we got data successfully
     if (response.success) {
       displayMovieInformation(response.data);
     } else {
@@ -217,8 +209,6 @@ function displayMovieInformation(movieData) {
       ${buildRatingsSection(movieData)}
       ${buildAwardsSection(movieData)}
       ${buildBoxOfficeSection(movieData)}
-      ${buildPlotSection(movieData)}
-      ${buildCastSection(movieData)}
       ${buildReviewsSection(movieData)}
     </div>
   `;
@@ -242,9 +232,6 @@ function buildMovieDetailsSection(movieData) {
     <div class="movie-details">
       <h4 class="movie-title">${movieData.Title}</h4>
       <div class="movie-year">${movieData.Year}</div>
-      <div class="movie-genre">
-        <strong>Genre:</strong> ${movieData.Genre || 'N/A'}
-      </div>
     </div>
   `;
 }
@@ -301,25 +288,6 @@ function buildBoxOfficeSection(movieData) {
     <div class="box-office">
       <h5>💰 Box Office</h5>
       <div class="box-office-amount">${movieData.detailedInfo.boxOffice.formatted}</div>
-    </div>
-  `;
-}
-
-function buildPlotSection(movieData) {
-  return `
-    <div class="movie-plot">
-      <strong>Plot:</strong> ${movieData.Plot || 'No plot available'}
-    </div>
-  `;
-}
-
-function buildCastSection(movieData) {
-  return `
-    <div class="movie-director">
-      <strong>Director:</strong> ${movieData.Director || 'N/A'}
-    </div>
-    <div class="movie-actors">
-      <strong>Cast:</strong> ${movieData.Actors || 'N/A'}
     </div>
   `;
 }
