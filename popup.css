@@ -37,11 +37,12 @@ body {
   color: black;
 }
 
-.header p {
+/* DOES THIS EXIST?? */
+/* .header p {
   margin: 0;
   opacity: 0.9;
   font-size: 14px;
-}
+} */
 
 /* Formatting for instructions to use */
 .content {
@@ -50,17 +51,17 @@ body {
   color: var(#333);
 }
 
-.features h4 {
-  margin: 20px 0 0 12px; 
-  color: #2c3e50;
-  font-size: 14px;
-}
-
 .features{
   background-color: var(--light-color);
   border-radius: 8px;
   padding: 2px;
   box-shadow: 10px 10px var(--medium-color);
+}
+
+.features h4 {
+  margin: 20px 0 0 12px; 
+  color: #2c3e50;
+  font-size: 14px;
 }
 
 /* List of info that is provided by the extension */
