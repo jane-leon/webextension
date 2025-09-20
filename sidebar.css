@@ -7,7 +7,6 @@
   --light-color: #d0b9ea;
   --bkg-color: white;
   --box-bkg-color: #e1e5e9;
-  --accent-color: #667eea;
   --text-color: #333;
   --light-text-color: white;
   --hover-color: #ffffff33;
@@ -98,7 +97,7 @@
   width: 24px;
   height: 24px;
   border: 3px solid var(--box-bkg-color);
-  border-top: 3px solid var(--accent-color);
+  border-top: 3px solid var(--medium-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 16px;
@@ -129,7 +128,7 @@
   max-width: 120px;
   height: auto;
   border-radius: 8px;
-  box-shadow: 0 4px 12px var(--hover-color);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .movie-details {
@@ -265,7 +264,7 @@
 
 .review-item:hover {
   transform: translateX(2px);
-  box-shadow: 0 2px 8px var(--shadow-color);
+  box-shadow: 0 2px 8px var(--hover-color);
 }
 
 /* last review should not have extra margin */
