@@ -19,7 +19,7 @@ function buildMovieInfoSidebar() {
 
   movieInfoSidebar.innerHTML = `
     <div class="sidebar-header">
-      <h3>🎬 Movie / TV Show Info 🎬</h3>
+      <h3>🎬  Movie or TV Show Info  🎬</h3>
       <button class="close-btn" title="Close">&times;</button>
     </div>
     <div class="sidebar-content">
@@ -185,12 +185,13 @@ function showLoadingMessage(movieTitle) {
   `;
 }
 
+//CHANGED: error message. used to be an emoji, and I changed it to a text message.
 function showErrorMessage(errorText) {
   const contentArea = movieInfoSidebar.querySelector('.sidebar-content');
   contentArea.innerHTML = `
     <div class="error">
-      <p>⚠️ ${errorText}</p>
-      <p>Try hovering over a different movie.</p>
+      <p>Sorry, something went wrong! ${errorText}</p>
+      <p>Try selecting a different movie or TV show.</p>
     </div>
   `;
 }
@@ -273,7 +274,7 @@ function buildAwardsSection(movieData) {
 
   return `
     <div class="movie-awards">
-      <h5>🏆 Awards & Recognition</h5>
+      <h5>Awards 🏆</h5>
       <p>${movieData.Awards}</p>
     </div>
   `;
@@ -286,7 +287,7 @@ function buildBoxOfficeSection(movieData) {
 
   return `
     <div class="box-office">
-      <h5>💰 Box Office</h5>
+      <h5>Box Office 💸</h5>
       <div class="box-office-amount">${movieData.detailedInfo.boxOffice.formatted}</div>
     </div>
   `;
@@ -299,7 +300,7 @@ function buildReviewsSection(movieData) {
 
   let reviewsHTML = `
     <div class="movie-reviews">
-      <h5>👥 User Reviews</h5>
+      <h5>Reviews from other watchers 👥</h5>
   `;
 
   movieData.userReviews.forEach(review => {
