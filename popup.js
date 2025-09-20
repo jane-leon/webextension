@@ -6,11 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentTab && currentTab.url) {
       if (currentTab.url.includes('netflix.com')) {
         const content = document.querySelector('.content');
-        //TODO: TRY TO CHANGE SUCCESSMSG.STYLE TO GO IN POPUP.CSS AND TEST
         const successMsg = document.createElement('div');
         successMsg.style.cssText = `
             background: white;
-            color: #764ba2;
+            color: #764ba2; 
             border: 1px solid #d0b9ea;
             padding: 10px;
             border-radius: 6px;
@@ -18,11 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
             text-align: center;
             font-size: 13px;
           `;
-        successMsg.innerHTML = '`<strong>Waiting to detect media</strong> Select a movie or TV show to get started!';
+        successMsg.innerHTML = '`<b>Waiting to detect media</b> Select a movie or TV show to get started!';
         content.appendChild(successMsg);
       } else {
         const content = document.querySelector('.content');
-        //TODO: TRY TO CHANGE HINT.STYLE TO GO IN POPUP.CSS AND TEST
         const hintMsg = document.createElement('div');
         hintMsg.style.cssText = `
             background: white;
@@ -34,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             text-align: center;
             font-size: 13px;
           `;
-        hintMsg.innerHTML = '<strong>Are you on Netflix?</strong> Go to Netflix.com to use this extension!';
+        hintMsg.innerHTML = '<b>Are you on Netflix?</b> Go to Netflix.com to use this extension!';
         content.appendChild(hintMsg);
       }
     }
