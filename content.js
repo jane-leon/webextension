@@ -229,8 +229,6 @@ function displayMovieInformation(movieData) {
       ${buildRatingsSection(movieData)}
       ${buildAwardsSection(movieData)}
       ${buildBoxOfficeSection(movieData)}
-      ${buildPlotSection(movieData)}
-      ${buildCastSection(movieData)}
       ${buildReviewsSection(movieData)}
     </div>
   `;
@@ -254,9 +252,6 @@ function buildMovieDetailsSection(movieData) {
     <div class="movie-details">
       <h4 class="movie-title">${movieData.Title}</h4>
       <div class="movie-year">${movieData.Year}</div>
-      <div class="movie-genre">
-        <strong>Genre:</strong> ${movieData.Genre || 'N/A'}
-      </div>
     </div>
   `;
 }
