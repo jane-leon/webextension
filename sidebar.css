@@ -1,16 +1,6 @@
 /* Styling for sidebar element of the extension, connected to content.js */
 @import url(https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;1,100;1,300;1,400;1,500;1,600;1,700&display=swap);
 
-@font-face {
-  font-family: 'Budmo', sans-serif;
-  src: url("../fonts/budmo/budmo jiggler.otf") format("opentype");
-}
-
-@font-face {
-  font-family: 'Showtime', sans-serif;
-  src: url("../fonts/showtime-font/Showtime-R9Ke.ttf") format("truetype");
-}
-
 :root {
   --medium-color: #764ba2;
   --light-color: #d0b9ea;
@@ -20,7 +10,6 @@
   --light-text-color: white;
   --hover-color: #ffffff33;
   --shadow-color: black;
-  --header-font: 'Budmo', 'Poppins', 'Helvetica', sans-serif;
   --reg-font: 'Poppins', 'Helvetica', sans-serif;
 }
 
@@ -64,7 +53,7 @@
 
 .sidebar-header h3 {
   margin: 0;
-  font-family: var(--header-font);
+  font-family: var(--reg-font);
   color: var(--medium-color);
   font-size: 16px;
   font-weight: 600;
