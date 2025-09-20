@@ -1,83 +1,18 @@
+:root {
+  --medium-color: #764ba2;
+  --light-color: #bfa5da;
+  --bkg-color: white;
+  --text-color: #333;
+  --font: 'Poppins', 'Helvetica', sans-serif;
+}
+
 body {
   width: 350px;
   padding: 0;
   margin: 0;
-  font-family: 'Poppins', 'Helvetica', sans-serif;
-  background: #764ba2;
-  color: white;
-}
-
-/* Font options and styling (Poppins from Google Fonts) */
-.poppins-thin {
-  font-family: "Poppins", sans-serif;
-  font-weight: 100;
-  font-style: normal;
-}
-
-.poppins-light {
-  font-family: "Poppins", sans-serif;
-  font-weight: 300;
-  font-style: normal;
-}
-
-.poppins-regular {
-  font-family: "Poppins", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.poppins-medium {
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  font-style: normal;
-}
-
-.poppins-semibold {
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  font-style: normal;
-}
-
-.poppins-bold {
-  font-family: "Poppins", sans-serif;
-  font-weight: 700;
-  font-style: normal;
-}
-
-.poppins-thin-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 100;
-  font-style: italic;
-}
-
-.poppins-light-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 300;
-  font-style: italic;
-}
-
-.poppins-regular-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 400;
-  font-style: italic;
-}
-
-.poppins-medium-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  font-style: italic;
-}
-
-.poppins-semibold-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  font-style: italic;
-}
-
-.poppins-bold-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 700;
-  font-style: italic;
+  font-family: var(--font);
+  background: var(--medium-color);
+  /* color: white; */
 }
 
 /* Formatting for title banner on web extension instructions */
@@ -103,13 +38,13 @@ body {
 /* Formatting for instructions to use */
 .content {
   padding: 24px;
-  background: white;
-  color: #333;
+  background: var(--light-color);
+  color: var(--text-color);
 }
 
 /* List of movie & TV show info that is provided by the extension */
 .feature-list {
-  list-style: none;
+  list-style: circle;
   padding: 0;
   margin: 16px 0;
 }
@@ -121,13 +56,13 @@ body {
   align-items: center;
 }
 
-/* CHANGE THIS (looks AI) */
-.feature-list li:before {
-  content: "✓";
-  color: #28a745;
+/* option to make custom bullet point */
+/* .feature-list li:before {
+  content: "-";
+  color: var(--text-color);
   font-weight: bold;
   margin-right: 8px;
-}
+} */
 
 .instructions {
   background: #f8f9fa;
