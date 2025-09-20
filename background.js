@@ -186,10 +186,7 @@ async function fetchDetailedMovieData(title) {
   }
 }
 
-// =============================================================================
 // BACKUP API FUNCTION - Use TMDB when OMDb fails
-// =============================================================================
-
 async function fetchMovieDataFromTMDB(title) {
   
   try {
@@ -199,13 +196,12 @@ async function fetchMovieDataFromTMDB(title) {
       throw new Error('Movie not found in TMDB');
     }
     
-    // Step 2: Get detailed movie info with credits
+    //Get detailed movie info
     const detailUrl = `${TMDB_API_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}`;
     const response = await fetch(detailUrl);
     const tmdbData = await response.json();
     
-    
-    // Step 3: Convert TMDB format to match OMDb format (for consistency)
+    //Convert TMDB format to match OMDb format (for consistency)
     const convertedData = {
       Title: tmdbData.title,
       Year: tmdbData.release_date ? tmdbData.release_date.substring(0, 4) : 'N/A',
