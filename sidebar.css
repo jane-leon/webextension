@@ -1,6 +1,15 @@
 /* Styling for sidebar element of the extension, connected to content.js */
 @import url(popup.https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;1,100;1,300;1,400;1,500;1,600;1,700&display=swap);
 
+@font-face {
+  font-family: 'Budmo', sans-serif;
+  src: url("fonts/budmo/budmo jiggler.otf") format("opentype")
+}
+
+@font-face {
+  font-family: 'Showtime', sans-serif;
+  src: url("fonts/showtime-font/Showtime-R9Ke.ttf") format("truetype")
+}
 
 :root {
   --medium-color: #764ba2;
@@ -11,7 +20,8 @@
   --light-text-color: white;
   --hover-color: #ffffff33;
   --shadow-color: black;
-  --font: 'Poppins', 'Helvetica', sans-serif;
+  --header-font: 'Budmo', 'Poppins', 'Helvetica', sans-serif;
+  --reg-font: 'Poppins', 'Helvetica', sans-serif;
 }
 
 
@@ -27,7 +37,7 @@
   border-radius: 12px;
   box-shadow: 0 8px 32px var(--shadow-color);
   z-index: 999999;
-  font-family: var(--font);
+  font-family: var(--reg-font);
   font-size: 14px;
   line-height: 1.4;
   overflow: hidden;
@@ -44,7 +54,7 @@
 
 .sidebar-header {
   background: var(--light-color);
-  font-family: var(--font);
+  font-family: var(--reg-font);
   color: var(--bkg-color);
   padding: 16px 20px;
   display: flex;
@@ -54,7 +64,7 @@
 
 .sidebar-header h3 {
   margin: 0;
-  font-family: var(--font);
+  font-family: var(--header-font);
   color: var(--medium-color);
   font-size: 16px;
   font-weight: 600;
@@ -132,7 +142,7 @@
 }
 
 .movie-details {
-  font-family: var(--font);
+  font-family: var(--reg-font);
   display: flex;
   flex-direction: column;
   gap: 12px;
