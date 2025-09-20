@@ -1,8 +1,8 @@
 :root {
   --medium-color: #764ba2;
-  --light-color: #d0b9ea;
-  --bkg-color: white;
-  --text-color: #333;
+  --light-color: #e3d7f0;
+  --bkg-color: #ffffff;
+  --text-color: #333333;
   --font: 'Poppins', 'Helvetica', sans-serif;
 }
 
@@ -12,28 +12,23 @@ body {
   margin: 0;
   font-family: var(--font);
   background: var(--bkg-color);
+  position: relative;
   /* color: white; */
 }
 
 /* Formatting for title banner on web extension instructions */
 .header {
-  padding: 20px 20px 0px;
+  padding: 20px 20px 10px;
   text-align: center;
-  color: var(--bkg-color);
-  background: #ffffff1a;
-  backdrop-filter: blur(10px);
+  /* color: var(--medium-color); */
+  /* background-color: white; */
+  /* backdrop-filter: blur(10px); */
 }
 
 .header h1 {
   font-size: 22px;
-  font-weight: 700;
-  color: var(--text-color);
-}
-
-h3 {
-  margin: 35px 0 0 0; 
-  color: #2c3e50;
-  font-size: 16px;
+  font-weight: 600;
+  color: black;
 }
 
 .header p {
@@ -45,21 +40,41 @@ h3 {
 /* Formatting for instructions to use */
 .content {
   padding: 3px 24px 24px;
-  background: var(--bkg-color);
-  color: var(--text-color);
+  /* background: var(--bkg-color); */
+  color: var(#333);
+}
+
+.features h4 {
+  margin: 20px 0 0 12px; 
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.features{
+  background-color: var(--light-color);
+  border-radius: 8px;
+  padding: 2px;
 }
 
 /* List of movie & TV show info that is provided by the extension */
 .feature-list {
   list-style: circle;
   padding: 0;
-  margin-top: 5px;
-  margin-bottom: 16px;
+  /* margin-top: 5px; */
+  /* margin-bottom: 16px; */
+}
+
+.feature-list ul {
+  margin: 0; 
+  padding-left: 16px;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .feature-list li {
-  padding: 5px 57px 0px 15px;
-  font-size: 14px;
+  /* padding: 5px 57px 0px 15px; */
+  padding-left: 15px;
+  /* font-size: 14px; */
   display: flex;
   align-items: center;
   width: 100%;
@@ -79,6 +94,8 @@ h3 {
   padding: 16px;
   border-radius: 8px;
   margin-top: 16px;
+  margin-bottom: 16px;
+  box-shadow: 10px 10px var(--medium-color);
 }
 
 .instructions h4 {
@@ -105,3 +122,31 @@ h3 {
   border-radius: 4px;
   font-weight: 600;
 }
+
+.color {
+  height: 500px;
+  width: 500px;
+  background-image: radial-gradient(closest-side, #59268d, white);
+  position: absolute;
+  top: -350px;
+  left: -16%;
+  z-index: -1;
+}
+
+/* .rounded-outline-box {
+  /* Box dimensions and background (optional) */
+  /* width: 200px;
+  height: 100px;
+  top: 300px;
+  left: -13%;
+   */
+  /* Apply border-radius to the element itself */
+  /* border-radius: 15px; Adjust the value for desired roundness */
+  
+  /* Apply the outline */
+  /* outline: 2px solid darkblue; Adjust width, style, and color as needed */
+  
+  /* Optional: Adjust the space between the element and the outline */
+  /* outline-offset: 5px; Positive values move the outline outwards */
+  /* z-index: 1; */
+/* } */ 
