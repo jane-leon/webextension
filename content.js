@@ -15,15 +15,14 @@ function buildMovieInfoSidebar() {
   movieInfoSidebar.id = 'movie-info-sidebar';
   movieInfoSidebar.className = 'movie-info-sidebar hidden'; // Start hidden
   
-  //HTML structure for our sidebar
   movieInfoSidebar.innerHTML = `
     <div class="sidebar-header">
-      <h3>🎬 Movie Info 🎬</h3>
+      <h3>🎬 Movie / TV Show Info 🎬</h3>
       <button class="close-btn" title="Close">&times;</button>
     </div>
     <div class="sidebar-content">
       <div class="loading">
-        <p>Click "More Info" on a movie and scroll to the About section!</p>
+        <p>Click "More Info" on a movie and scroll to the "About" section!</p>
       </div>
     </div>
   `;
@@ -212,7 +211,7 @@ function showErrorMessage(errorText) {
   contentArea.innerHTML = `
     <div class="error">
       <p>${errorText}</p>
-      <p>Error: Try hovering over a different movie.</p>
+      <p>Sorry! Something went wrong. Try selecting a different movie :(</p>
     </div>
   `;
 }
@@ -230,8 +229,6 @@ function displayMovieInformation(movieData) {
       ${buildRatingsSection(movieData)}
       ${buildAwardsSection(movieData)}
       ${buildBoxOfficeSection(movieData)}
-      ${buildPlotSection(movieData)}
-      ${buildCastSection(movieData)}
       ${buildReviewsSection(movieData)}
     </div>
   `;
@@ -318,25 +315,6 @@ function buildBoxOfficeSection(movieData) {
   `;
 }
 
-function buildPlotSection(movieData) {
-  return `
-    <div class="movie-plot">
-      <strong>Plot:</strong> ${movieData.Plot || 'No plot available'}
-    </div>
-  `;
-}
-
-function buildCastSection(movieData) {
-  return `
-    <div class="movie-director">
-      <strong>Director:</strong> ${movieData.Director || 'N/A'}
-    </div>
-    <div class="movie-actors">
-      <strong>Cast:</strong> ${movieData.Actors || 'N/A'}
-    </div>
-  `;
-}
-
 function buildReviewsSection(movieData) {
   if (!movieData.userReviews || movieData.userReviews.length === 0) {
     return '';
@@ -364,7 +342,7 @@ function buildReviewsSection(movieData) {
   return reviewsHTML;
 }
 
-/* Page navigation: Restart extension when user scrolls on Netflix */
+/* Restart extension when user scrolls on Netflix */
 
 let currentPageUrl = location.href;
 
