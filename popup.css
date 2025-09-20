@@ -47,6 +47,7 @@ body {
 .feature-list {
   list-style: circle;
   padding: 0;
+  margin-top: 5px;
   margin-bottom: 16px;
 }
 
