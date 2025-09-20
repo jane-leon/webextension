@@ -5,7 +5,7 @@
 
 let movieInfoSidebar = null;          // Will hold our sidebar element
 let currentMovieElement = null;       // Tracks which movie modal we're viewing
-let detectionDelayTimer = null;       // Timer to prevent too many API calls
+// let detectionDelayTimer = null;       // Timer to prevent too many API calls
 
 function startExtension() {
   buildMovieInfoSidebar();
@@ -41,15 +41,9 @@ function buildMovieInfoSidebar() {
   closeButton.addEventListener('click', hideSidebar);
 }
 
-//  Listen for when users open Netflix movie about page
-
-function setupModalDetection() {
-  console.log('👀 Setting up Netflix modal detection...');
-  
-  // Listen for mouse entering elements (mouseover)
+// Listen for when users open Netflix movie about page
+function setupModalDetection() {  
   document.addEventListener('mouseover', handleMouseEnterElement);
-  
-  // Listen for mouse leaving elements (mouseout)  
   document.addEventListener('mouseout', handleMouseLeaveElement);
 }
 
@@ -61,14 +55,14 @@ function handleMouseEnterElement(event) {
   const modalElement = findNetflixModalElement(hoveredElement);
   
   if (modalElement && modalElement !== currentMovieElement) {
-    console.log('🎯 Found a Netflix movie modal!', modalElement);
     currentMovieElement = modalElement;
-    
-    // Don't fetch data immediately - wait a bit to see if user is still in modal
-    clearTimeout(detectionDelayTimer);
-    detectionDelayTimer = setTimeout(() => {
-      loadMovieInformation(modalElement);
-    }, 800); // Wait 800ms before loading info
+
+    loadMovieInformation(modalElement); 
+    // // Don't fetch data immediately - wait a bit to see if user is still in modal
+    // clearTimeout(detectionDelayTimer);
+    // detectionDelayTimer = setTimeout(() => {
+    //   loadMovieInformation(modalElement);
+    // }, 800); // Wait 800ms before loading info
   }
 }
 
@@ -80,9 +74,10 @@ function handleMouseLeaveElement(event) {
   const modalElement = findNetflixModalElement(leftElement);
   
   if (!modalElement) {
-    // Clear the timer since we're not in a movie modal anymore
-    clearTimeout(detectionDelayTimer);
     currentMovieElement = null;
+    // // Clear the timer since we're not in a movie modal anymore
+    // clearTimeout(detectionDelayTimer);
+    // currentMovieElement = null;
   }
 }
 
