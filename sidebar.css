@@ -1,8 +1,11 @@
+@import url(popup.https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;1,100;1,300;1,400;1,500;1,600;1,700&display=swap);
+
 :root {
   --medium-color: #764ba2;
   --light-color: #d0b9ea;
   --bkg-color: white;
   --text-color: #333;
+  --border-color: #667eea;
   --font: 'Poppins', 'Helvetica', sans-serif;
 }
 
@@ -17,7 +20,7 @@
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     z-index: 999999;
-    font-family: 'Poppins', Helvetica, sans-serif;
+    font-family: var(--font);
     font-size: 14px;
     line-height: 1.4;
     overflow: hidden;
@@ -32,8 +35,8 @@
   }
   
   .sidebar-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--medium-color);
+    color: var(--bkg-color);
     padding: 16px 20px;
     display: flex;
     justify-content: space-between;
@@ -49,7 +52,7 @@
   .close-btn {
     background: none;
     border: none;
-    color: white;
+    color: var(--bkg-color);
     font-size: 20px;
     cursor: pointer;
     padding: 0;
@@ -74,7 +77,7 @@
   
   .loading {
     text-align: center;
-    color: #666;
+    color: var(--text-color);
     padding: 40px 20px;
   }
   
@@ -120,12 +123,12 @@
     margin: 0;
     font-size: 18px;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--text-color);
     line-height: 1.3;
   }
   
   .movie-year {
-    color: #7f8c8d;
+    color: var(--medium-color);
     font-weight: 500;
   }
   
@@ -139,7 +142,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #f8f9fa;
+    background: var(--light-color);
     padding: 8px 12px;
     border-radius: 8px;
     min-width: 60px;
@@ -147,7 +150,7 @@
   
   .rating-label {
     font-size: 12px;
-    color: #6c757d;
+    color: var(--text-color);
     font-weight: 500;
     margin-bottom: 4px;
   }
@@ -155,7 +158,7 @@
   .rating-value {
     font-size: 14px;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--medium-color);
   }
   
   .movie-genre,
@@ -170,12 +173,12 @@
   .movie-plot strong,
   .movie-director strong,
   .movie-actors strong {
-    color: #495057;
+    color: var(--medium-color);
     font-weight: 600;
   }
   
   .movie-plot {
-    background: #f8f9fa;
+    background: var(--light-color);
     padding: 12px;
     border-radius: 8px;
     border-left: 3px solid #667eea;
@@ -195,7 +198,7 @@
   .movie-awards {
     margin: 12px 0;
     padding: 12px;
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+    background: var(--medium-color);
     border-radius: 8px;
     text-align: center;
   }
@@ -204,7 +207,7 @@
     margin: 0 0 8px 0;
     font-size: 14px;
     font-weight: 600;
-    color: #8b4513;
+    color: var(--medium-color);
   }
   
   .awards-list {
@@ -216,7 +219,7 @@
   
   .award-badge {
     background: rgba(139, 69, 19, 0.1);
-    color: #8b4513;
+    color: var(--medium-color);
     padding: 4px 8px;
     border-radius: 6px;
     font-size: 12px;
@@ -228,10 +231,10 @@
   .box-office {
     margin: 12px 0;
     padding: 12px;
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: var(--medium-color);
     border-radius: 8px;
     text-align: center;
-    color: white;
+    color: var(--bkg-color);
   }
   
   .box-office h5 {
@@ -244,7 +247,7 @@
   .box-office-amount {
     font-size: 16px;
     font-weight: 700;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    color: var(--text-color)
   }
   
   /* Movie reviews section */
@@ -258,11 +261,11 @@
     margin: 0 0 12px 0;
     font-size: 14px;
     font-weight: 600;
-    color: #495057;
+    color: var(--text-color);
   }
   
   .review-item {
-    background: #f8f9fa;
+    background: var(--light-color);
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 10px;
@@ -288,13 +291,13 @@
   
   .review-author {
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--medium-color);
     font-size: 13px;
   }
   
   .review-rating {
-    background: #fff3cd;
-    color: #856404;
+    background: var(--light-color);
+    color: var(--medium-color);
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 11px;
@@ -304,14 +307,14 @@
   .review-content {
     font-size: 12px;
     line-height: 1.4;
-    color: #495057;
+    color: var(--text-color);
     margin-bottom: 6px;
     text-align: left;
   }
   
   .review-date {
     font-size: 11px;
-    color: #6c757d;
+    color: var(--text-color);
     text-align: right;
     font-style: italic;
   }
