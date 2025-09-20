@@ -23,7 +23,7 @@ function buildMovieInfoSidebar() {
   //HTML structure for our sidebar
   movieInfoSidebar.innerHTML = `
     <div class="sidebar-header">
-      <h3>🎬 Movie Info</h3>
+      <h3>🎬 Movie Info 🎬</h3>
       <button class="close-btn" title="Close">&times;</button>
     </div>
     <div class="sidebar-content">
@@ -81,9 +81,8 @@ function handleMouseLeaveElement(event) {
   }
 }
 
-// =============================================================================
-// NETFLIX MODAL DETECTION - Find movie modal elements (More Info sections)
-// =============================================================================
+
+/* Find movie modal elements ("About" section) */
 
 function findNetflixModalElement(startingElement) {
   // Netflix uses these CSS classes for movie preview modals and about sections
@@ -102,39 +101,26 @@ function findNetflixModalElement(startingElement) {
     '.bob-card'                       // "Bigger" card format (backup)
   ];
   
-  // Check each selector to see if our element matches
+  // Check selectors to see if element matches
   for (let selector of netflixModalSelectors) {
-    // .closest() looks at the element and all its parent elements
+    // Look at the element and all its parent elements
     const foundElement = startingElement.closest(selector);
-    if (foundElement) {
-      console.log(`📍 Found Netflix modal using selector: ${selector}`);
-      return foundElement;
-    }
   }
   
   // No modal element found
   return null;
 }
 
-// =============================================================================
-// MOVIE TITLE EXTRACTION - Get movie name from Netflix's modal About section
-// =============================================================================
+/* Title extraction: Get movie name from Netflix's modal "About" section */
 
 function extractMovieTitle(modalElement) {
-  console.log('🔍 Trying to extract movie title from Netflix modal...');
-  
   let movieTitle = null;
   
-  // Method 1: Look for title in Netflix modal headers (MOST RELIABLE)
-  // This is the main target - when users click "More Info" and see the About section
+  // Users click "More Info" and see the "About" section
   const modalTitle = modalElement.querySelector('.previewModal--section-header strong');
   if (modalTitle) {
     movieTitle = modalTitle.textContent.trim();
-    console.log('✅ Found title in modal About section header:', movieTitle);
   }
-  
-
-
   
   // Clean up the title and return it
   return cleanupMovieTitle(movieTitle);
@@ -149,7 +135,6 @@ function extractMovieTitle(modalElement) {
 // Helper function to clean up extracted movie titles
 function cleanupMovieTitle(title) {
   if (!title) {
-    console.log('❌ No title found');
     return null;
   }
   
@@ -159,28 +144,22 @@ function cleanupMovieTitle(title) {
   // Clean up extra spaces
   title = title.replace(/\s+/g, ' ').trim();
   
-  // Make sure it's long enough to be a real title
+  // Title can't be too short
   if (title.length < 2) {
-    console.log('❌ Title too short:', title);
     return null;
   }
   
-  console.log('✅ Cleaned title:', title);
   return title;
 }
 
-// =============================================================================
-// MOVIE INFORMATION LOADING - Get movie data and display it
-// =============================================================================
+/* Get movie data and display it */
 
 async function loadMovieInformation(modalElement) {
-  console.log('📡 Loading movie information from modal...');
   
   // Extract the movie title from the modal HTML element
   const movieTitle = extractMovieTitle(modalElement);
   
   if (!movieTitle) {
-    console.log('❌ Could not extract movie title');
     return;
   }
   
@@ -190,14 +169,11 @@ async function loadMovieInformation(modalElement) {
   
   try {
     // Send a message to the background script to fetch movie data
-    console.log('📤 Sending message to background script for:', movieTitle);
     
     const response = await chrome.runtime.sendMessage({
       action: 'getMovieInfo',    // Tell background script what we want
       title: movieTitle          // Send the movie title
     });
-    
-    console.log('📥 Received response from background script:', response);
     
     // Check if we got data successfully
     if (response.success) {
@@ -207,26 +183,21 @@ async function loadMovieInformation(modalElement) {
     }
     
   } catch (error) {
-    console.error('❌ Error fetching movie info:', error);
     showErrorMessage('Failed to fetch movie information');
   }
 }
 
-// =============================================================================
-// SIDEBAR DISPLAY FUNCTIONS - Show/hide sidebar and display content
-// =============================================================================
+/* Extension sidebar: show/hide extension and content */
 
 function showSidebar() {
   if (movieInfoSidebar) {
     movieInfoSidebar.classList.remove('hidden');
-    console.log('👁️ Sidebar is now visible');
   }
 }
 
 function hideSidebar() {
   if (movieInfoSidebar) {
     movieInfoSidebar.classList.add('hidden');
-    console.log('🙈 Sidebar is now hidden');
   }
   currentMovieElement = null;
 }
