@@ -6,6 +6,11 @@
   "permissions": [
     "activeTab"
   ],
+
+  "icons": {
+    "128": "images/logo.png"
+  },
+
   "host_permissions": [
     "https://www.netflix.com/*",
     "https://www.omdbapi.com/*",
@@ -28,6 +33,9 @@
     "service_worker": "background.js"
   },
   "action": {
+    "default_icon":{
+      "128": "images/logo.png"
+    },
     "default_popup": "popup.html",
     "default_title": "Netflix Movie Info"
   },
