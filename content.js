@@ -293,13 +293,14 @@ function buildReviewsSection(movieData) {
 }
 
 function buildFunFactSection(movieData) {
+  
   if (!movieData.funFact) {
     return '';
   }
 
   return `
     <div class="movie-fun-fact">
-      <h5>🎭 Fun Fact</h5>
+      <h5> Fun Fact 🐒 </h5>
       <p>${movieData.funFact}</p>
     </div>
   `;

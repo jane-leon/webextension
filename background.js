@@ -8,7 +8,7 @@ const TMDB_API_KEY = '3126e89bfccb852840b00afa13857781';
 const TMDB_API_URL = 'https://api.themoviedb.org/3';
 
 const GEMINI_API_KEY = 'AIzaSyCVftdUFa2Dc88-VmFg9phUGAqRd2o8GLU'; 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // Create a cache to store movie data (like a dictionary/map)
 const movieDataCache = new Map();
@@ -31,7 +31,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-//fetching movie info!!
 async function fetchCompleteMovieInfo(movieTitle) {
   try {
     //Check if we already have this movie in our cache
@@ -45,7 +44,7 @@ async function fetchCompleteMovieInfo(movieTitle) {
       fetchBasicMovieData(cleanTitle),
       fetchMovieReviews(cleanTitle),
       fetchDetailedMovieData(cleanTitle),
-      fetchMovieFunFact(cleanTitle, '') 
+      fetchMovieFunFact(cleanTitle, '')
     ];
 
     const results = await Promise.allSettled(dataPromises);
@@ -64,7 +63,7 @@ async function fetchCompleteMovieInfo(movieTitle) {
     if (finalMovieData) {
       finalMovieData.userReviews = reviews;
       finalMovieData.detailedInfo = detailedData;
-      finalMovieData.funFact = funFact; 
+      finalMovieData.funFact = funFact;
 
       // Save to cache for future use (prevents stack overflow from calling API too frequently)
       saveMovieToCache(movieTitle, finalMovieData);
@@ -311,6 +310,7 @@ function formatSimpleBoxOffice(revenue) {
 
 // GEMIINI MAGIC
 async function fetchMovieFunFact(movieTitle, movieYear) {
+  
   try {
     const prompt = `Give me one interesting, fun fact about the movie "${movieTitle}" (${movieYear}). 
     Keep it short (2-3 sentences), spoiler-free, and focus on behind-the-scenes trivia, cast facts, or
@@ -333,12 +333,14 @@ async function fetchMovieFunFact(movieTitle, movieYear) {
     const data = await response.json();
     
     if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-      return data.candidates[0].content.parts[0].text;
+      const funFact = data.candidates[0].content.parts[0].text;
+      return funFact;
+    } else {
+      return null;
     }
     
-    return null;
   } catch (error) {
-    return null; // Fail silently, don't break the extension
+    return null;
   }
 }
 // =============================================================================
