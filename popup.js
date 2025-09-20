@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const successMsg = document.createElement('div');
         successMsg.style.cssText = `
             background: white;
-            color: #764ba2; 
+            color: #764ba2ff; 
             border: 1px solid #d0b9ea;
             padding: 10px;
             border-radius: 6px;
