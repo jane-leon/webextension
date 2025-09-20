@@ -1,11 +1,6 @@
-
-// This script runs on Netflix pages and detects when users open movie details
-// It creates a sidebar that shows movie information when in the "About" section
-
-
-let movieInfoSidebar = null;          // Will hold our sidebar element
-let currentMovieElement = null;       // Tracks which movie modal we're viewing
-// let detectionDelayTimer = null;       // Timer to prevent too many API calls
+let movieInfoSidebar = null;
+let currentMovieElement = null;
+// let detectionDelayTimer = null;
 
 function startExtension() {
   buildMovieInfoSidebar();
@@ -23,7 +18,7 @@ function buildMovieInfoSidebar() {
   //HTML structure for our sidebar
   movieInfoSidebar.innerHTML = `
     <div class="sidebar-header">
-      <h3>🎬 Movie Info</h3>
+      <h3>🎬 Movie Info 🎬</h3>
       <button class="close-btn" title="Close">&times;</button>
     </div>
     <div class="sidebar-content">
@@ -81,9 +76,8 @@ function handleMouseLeaveElement(event) {
   }
 }
 
-// =============================================================================
-// NETFLIX MODAL DETECTION - Find movie modal elements (More Info sections)
-// =============================================================================
+
+/* Find movie modal elements ("About" section) */
 
 function findNetflixModalElement(startingElement) {
   // Netflix uses these CSS classes for movie preview modals and about sections
@@ -102,39 +96,26 @@ function findNetflixModalElement(startingElement) {
     '.bob-card'                       // "Bigger" card format (backup)
   ];
   
-  // Check each selector to see if our element matches
+  // Check selectors to see if element matches
   for (let selector of netflixModalSelectors) {
-    // .closest() looks at the element and all its parent elements
+    // Look at the element and all its parent elements
     const foundElement = startingElement.closest(selector);
-    if (foundElement) {
-      console.log(`📍 Found Netflix modal using selector: ${selector}`);
-      return foundElement;
-    }
   }
   
   // No modal element found
   return null;
 }
 
-// =============================================================================
-// MOVIE TITLE EXTRACTION - Get movie name from Netflix's modal About section
-// =============================================================================
+/* Title extraction: Get movie name from Netflix's modal "About" section */
 
 function extractMovieTitle(modalElement) {
-  console.log('🔍 Trying to extract movie title from Netflix modal...');
-  
   let movieTitle = null;
   
-  // Method 1: Look for title in Netflix modal headers (MOST RELIABLE)
-  // This is the main target - when users click "More Info" and see the About section
+  // Users click "More Info" and see the "About" section
   const modalTitle = modalElement.querySelector('.previewModal--section-header strong');
   if (modalTitle) {
     movieTitle = modalTitle.textContent.trim();
-    console.log('✅ Found title in modal About section header:', movieTitle);
   }
-  
-
-
   
   // Clean up the title and return it
   return cleanupMovieTitle(movieTitle);
@@ -149,7 +130,6 @@ function extractMovieTitle(modalElement) {
 // Helper function to clean up extracted movie titles
 function cleanupMovieTitle(title) {
   if (!title) {
-    console.log('❌ No title found');
     return null;
   }
   
@@ -159,28 +139,22 @@ function cleanupMovieTitle(title) {
   // Clean up extra spaces
   title = title.replace(/\s+/g, ' ').trim();
   
-  // Make sure it's long enough to be a real title
+  // Title can't be too short
   if (title.length < 2) {
-    console.log('❌ Title too short:', title);
     return null;
   }
   
-  console.log('✅ Cleaned title:', title);
   return title;
 }
 
-// =============================================================================
-// MOVIE INFORMATION LOADING - Get movie data and display it
-// =============================================================================
+/* Get movie data and display it */
 
 async function loadMovieInformation(modalElement) {
-  console.log('📡 Loading movie information from modal...');
   
   // Extract the movie title from the modal HTML element
   const movieTitle = extractMovieTitle(modalElement);
   
   if (!movieTitle) {
-    console.log('❌ Could not extract movie title');
     return;
   }
   
@@ -190,14 +164,11 @@ async function loadMovieInformation(modalElement) {
   
   try {
     // Send a message to the background script to fetch movie data
-    console.log('📤 Sending message to background script for:', movieTitle);
     
     const response = await chrome.runtime.sendMessage({
       action: 'getMovieInfo',    // Tell background script what we want
       title: movieTitle          // Send the movie title
     });
-    
-    console.log('📥 Received response from background script:', response);
     
     // Check if we got data successfully
     if (response.success) {
@@ -207,26 +178,21 @@ async function loadMovieInformation(modalElement) {
     }
     
   } catch (error) {
-    console.error('❌ Error fetching movie info:', error);
     showErrorMessage('Failed to fetch movie information');
   }
 }
 
-// =============================================================================
-// SIDEBAR DISPLAY FUNCTIONS - Show/hide sidebar and display content
-// =============================================================================
+/* Extension sidebar: show/hide extension and content */
 
 function showSidebar() {
   if (movieInfoSidebar) {
     movieInfoSidebar.classList.remove('hidden');
-    console.log('👁️ Sidebar is now visible');
   }
 }
 
 function hideSidebar() {
   if (movieInfoSidebar) {
     movieInfoSidebar.classList.add('hidden');
-    console.log('🙈 Sidebar is now hidden');
   }
   currentMovieElement = null;
 }
@@ -245,19 +211,15 @@ function showErrorMessage(errorText) {
   const contentArea = movieInfoSidebar.querySelector('.sidebar-content');
   contentArea.innerHTML = `
     <div class="error">
-      <p>⚠️ ${errorText}</p>
-      <p>Try hovering over a different movie.</p>
+      <p>${errorText}</p>
+      <p>Error: Try hovering over a different movie.</p>
     </div>
   `;
 }
 
-// =============================================================================
-// MOVIE DATA DISPLAY - Format and show the movie information
-// =============================================================================
+/* Content: Format and show movie info */
 
-function displayMovieInformation(movieData) {
-  console.log('🎨 Displaying movie information:', movieData);
-  
+function displayMovieInformation(movieData) {  
   const contentArea = movieInfoSidebar.querySelector('.sidebar-content');
   
   // Build the HTML for movie information
@@ -303,7 +265,7 @@ function buildMovieDetailsSection(movieData) {
 function buildRatingsSection(movieData) {
   let ratingsHTML = '<div class="ratings">';
   
-  // IMDb Rating
+  // Imdb rating
   if (movieData.imdbRating !== 'N/A') {
     ratingsHTML += `
       <div class="rating">
@@ -313,13 +275,13 @@ function buildRatingsSection(movieData) {
     `;
   }
   
-  // Rotten Tomatoes Rating
+  // Rotten Tomatoes rating
   if (movieData.Ratings) {
     const rtRating = movieData.Ratings.find(r => r.Source === 'Rotten Tomatoes');
     if (rtRating) {
       ratingsHTML += `
         <div class="rating">
-          <span class="rating-label">RT</span>
+          <span class="rating-label">RT 🍅</span>
           <span class="rating-value">${rtRating.Value}</span>
         </div>
       `;
@@ -337,7 +299,7 @@ function buildAwardsSection(movieData) {
   
   return `
     <div class="movie-awards">
-      <h5>🏆 Awards & Recognition</h5>
+      <h5>Awards 🏆</h5>
       <p>${movieData.Awards}</p>
     </div>
   `;
@@ -350,7 +312,7 @@ function buildBoxOfficeSection(movieData) {
   
   return `
     <div class="box-office">
-      <h5>💰 Box Office</h5>
+      <h5>Box Office 💸</h5>
       <div class="box-office-amount">${movieData.detailedInfo.boxOffice.formatted}</div>
     </div>
   `;
@@ -382,7 +344,7 @@ function buildReviewsSection(movieData) {
   
   let reviewsHTML = `
     <div class="movie-reviews">
-      <h5>👥 User Reviews</h5>
+      <h5>Top Reviews 👥</h5>
   `;
   
   movieData.userReviews.forEach(review => {
@@ -402,41 +364,31 @@ function buildReviewsSection(movieData) {
   return reviewsHTML;
 }
 
-// =============================================================================
-// PAGE NAVIGATION HANDLING - Restart extension when Netflix navigates
-// =============================================================================
-
-// Netflix is a Single Page Application (SPA), so we need to detect when
-// the user navigates to a new page and restart our extension
+/* Page navigation: Restart extension when user scrolls on Netflix */
 
 let currentPageUrl = location.href;
 
-// Watch for changes to the page content
+// Watch changes to page content
 const pageObserver = new MutationObserver(() => {
   const newUrl = location.href;
   if (newUrl !== currentPageUrl) {
     currentPageUrl = newUrl;
-    console.log('🔄 Netflix page changed, restarting extension...');
     
-    // Wait a bit for Netflix to load the new content, then restart
+    // Wait for Netflix to load the new content, then restart
     setTimeout(startExtension, 1500);
   }
 });
 
 // Start watching for page changes
 pageObserver.observe(document, { 
-  subtree: true,      // Watch all descendant elements
-  childList: true     // Watch for elements being added/removed
+  subtree: true,
+  childList: true
 });
 
-// =============================================================================
-// EXTENSION STARTUP - Initialize everything when the page is ready
-// =============================================================================
+/* Load extension */
 
 if (document.readyState === 'loading') {
-  // Page is still loading, wait for it to finish
   document.addEventListener('DOMContentLoaded', startExtension);
 } else {
-  // Page is already loaded, start immediately
   startExtension();
 }
