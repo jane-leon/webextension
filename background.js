@@ -1,10 +1,10 @@
-// This script runs in the background and handles API calls to movie databases
-// It fetches movie information when requested by the content script
+// Backend: handles API calls to movie & TV show databases
+// Gets movie/show info when content.js requests that info
 
-const OMDB_API_KEY = 'cb486c88'; 
+const OMDB_API_KEY = 'cb486c88';
 const OMDB_API_URL = 'https://www.omdbapi.com/';
 
-const TMDB_API_KEY = '3126e89bfccb852840b00afa13857781'; 
+const TMDB_API_KEY = '3126e89bfccb852840b00afa13857781';
 const TMDB_API_URL = 'https://api.themoviedb.org/3';
 
 // Create a cache to store movie data (like a dictionary/map)
@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ success: true, data: movieData });
       })
       .catch(error => {
-        console.error('Error fetching movie data:', error);
+        console.error('Can\'t fetch movie data:', error);
         sendResponse({ success: false, error: error.message });
       });
     return true;
@@ -39,34 +39,34 @@ async function fetchCompleteMovieInfo(movieTitle) {
     // Clean up the movie title for better API results
     const cleanTitle = cleanMovieTitle(movieTitle);
     const dataPromises = [
-      fetchBasicMovieData(cleanTitle),    
-      fetchMovieReviews(cleanTitle),      
-      fetchDetailedMovieData(cleanTitle)  
+      fetchBasicMovieData(cleanTitle),
+      fetchMovieReviews(cleanTitle),
+      fetchDetailedMovieData(cleanTitle)
     ];
-  
+
     const results = await Promise.allSettled(dataPromises);
-    //Process the results
+    // Process the results
     const basicData = results[0].status === 'fulfilled' ? results[0].value : null;
     const reviews = results[1].status === 'fulfilled' ? results[1].value : [];
     const detailedData = results[2].status === 'fulfilled' ? results[2].value : {};
-    
-    //If primary API failed, try backup API
+
+    // If OMDB fails or is missing some info, try TMDB (alternative API)
     let finalMovieData = basicData;
     if (!finalMovieData) {
       finalMovieData = await fetchMovieDataFromTMDB(cleanTitle);
     }
-    // Combine all the data
+    // Combine data from 2 APIs
     if (finalMovieData) {
       finalMovieData.userReviews = reviews;
       finalMovieData.detailedInfo = detailedData;
-      
-      //Save to cache for future use
+
+      // Save to cache for future use (prevents stack overflow from calling API too frequently)
       saveMovieToCache(movieTitle, finalMovieData);
       return finalMovieData;
     } else {
-      throw new Error('Movie not found in any database');
+      throw new Error('Movie not found in either database');
     }
-    
+
   } catch (error) {
     console.error('Error in fetchCompleteMovieInfo:', error);
     throw error;
@@ -78,11 +78,11 @@ function cleanMovieTitle(title) {
   return cleanedTitle;
 }
 
+/* Helper function to get basic info from OMDb */
 async function fetchBasicMovieData(title) {
   try {
     const apiUrl = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(title)}&plot=short`;
-    // Make the API call
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl); // Make the API call
     const data = await response.json();
     if (data.Response === 'False') {
       return await searchMovieInOMDb(title);
@@ -94,11 +94,10 @@ async function fetchBasicMovieData(title) {
   }
 }
 
-// Helper function to search for movies when exact match fails
+/* Helper function to search OMDb for the movie */
 async function searchMovieInOMDb(title) {
-  
   try {
-    // Search for movies with similar titles
+    // If no exact match, search for similar titles
     const searchUrl = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(title)}`;
     const searchResponse = await fetch(searchUrl);
     const searchData = await searchResponse.json();
@@ -113,29 +112,29 @@ async function searchMovieInOMDb(title) {
         return detailData;
       }
     }
-    throw new Error('No matching movies found in OMDb');
+    throw new Error('Can\'t find movie in OMDb');
   } catch (error) {
     console.error('Error in OMDb search:', error);
     throw error;
   }
 }
 
+/* Helper function to get movie reviews from TMDb */
 async function fetchMovieReviews(title) {
   try {
-    //Search for the movie to get its TMDB ID
+    // get movie's TMDB ID
     const movieId = await findMovieIdInTMDB(title);
     if (!movieId) {
       return [];
     }
-    //Get reviews using the movie ID
-    const reviewsUrl = `${TMDB_API_URL}/movie/${movieId}/reviews?api_key=${TMDB_API_KEY}`;
+    const reviewsUrl = `${TMDB_API_URL}/movie/${movieId}/reviews?api_key=${TMDB_API_KEY}`; // Get reviews using the movie ID
     const response = await fetch(reviewsUrl);
     const data = await response.json();
-    //Process and format the reviews
+    // Process and format the reviews
     if (!data.results || data.results.length === 0) {
       return [];
     }
-    //Take the first 3 reviews and format them nicely
+    // Use the first 3 reviews and format them nicely
     const formattedReviews = data.results.slice(0, 3).map(review => ({
       author: review.author,
       content: shortenText(review.content, 300), // Limit review length
@@ -143,15 +142,16 @@ async function fetchMovieReviews(title) {
       url: review.url,
       created_at: formatDate(review.created_at)
     }));
-    
+
     return formattedReviews;
-    
+
   } catch (error) {
-    console.error('💥 Error fetching reviews from TMDB:', error);
+    console.error('Can\'t fetch reviews from TMDB:', error);
     return []; // Return empty array instead of failing completely
   }
 }
 
+/* Helper function to get more detailed info from TMDb */
 async function fetchDetailedMovieData(title) {
   try {
     // Find the movie ID in TMDB
@@ -173,11 +173,11 @@ async function fetchDetailedMovieData(title) {
         formatted: formatBoxOfficeNumbers(data.revenue, data.budget)
       };
     }
-    
+
     detailedInfo.popularity = data.popularity || 0;
     detailedInfo.voteAverage = data.vote_average || 0;
     detailedInfo.voteCount = data.vote_count || 0;
-    
+
     return detailedInfo;
 
   } catch (error) {
@@ -186,27 +186,27 @@ async function fetchDetailedMovieData(title) {
   }
 }
 
-// BACKUP API FUNCTION - Use TMDB when OMDb fails
+/* Helper function to use TMDb when OMDb fails */
 async function fetchMovieDataFromTMDB(title) {
-  
+
   try {
     // Search for the movie
     const movieId = await findMovieIdInTMDB(title);
     if (!movieId) {
       throw new Error('Movie not found in TMDB');
     }
-    
+
     //Get detailed movie info
     const detailUrl = `${TMDB_API_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}`;
     const response = await fetch(detailUrl);
     const tmdbData = await response.json();
-    
-    //Convert TMDB format to match OMDb format (for consistency)
+
+    //Convert TMDB format to match OMDb format, so it displays the same way
     const convertedData = {
       Title: tmdbData.title,
       Year: tmdbData.release_date ? tmdbData.release_date.substring(0, 4) : 'N/A',
       Released: tmdbData.release_date || 'N/A',
-      Poster: tmdbData.poster_path ? 
+      Poster: tmdbData.poster_path ?
         `https://image.tmdb.org/t/p/w300${tmdbData.poster_path}` : 'N/A',
       Ratings: [
         {
@@ -220,63 +220,57 @@ async function fetchMovieDataFromTMDB(title) {
       BoxOffice: tmdbData.revenue ? formatSimpleBoxOffice(tmdbData.revenue) : 'N/A',
       Response: 'True'
     };
-    
+
     return convertedData;
-    
+
   } catch (error) {
-    console.error('💥 Error using TMDB as backup:', error);
+    console.error('Error using TMDB as backup:', error);
     throw error;
   }
 }
 
-// =============================================================================
-// HELPER FUNCTIONS - Small utilities used throughout the script
-// =============================================================================
-
-// Find a movie's TMDB ID by searching for its title
+/* Helper for helper function: find movie's TMDb ID */
 async function findMovieIdInTMDB(title) {
-  
   try {
     const searchUrl = `${TMDB_API_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
     const response = await fetch(searchUrl);
     const data = await response.json();
-    
+
     if (data.results && data.results.length > 0) {
       const movieId = data.results[0].id;
       return movieId;
     }
-    
+
     return null;
-    
   } catch (error) {
-    console.error('💥 Error searching TMDB:', error);
+    console.error('Error searching TMDB:', error);
     return null;
   }
 }
 
-// Shorten long text to a specified length
+/* Function to cut off long reviews at a specified length */
 function shortenText(text, maxLength) {
   if (!text || text.length <= maxLength) return text;
   return text.substring(0, maxLength).trim() + '...';
 }
 
-// Format dates into a readable format
+/* Function to format dates consistently */
 function formatDate(dateString) {
   if (!dateString) return 'Unknown date';
-  
+
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   } catch (error) {
     return 'Unknown date';
   }
 }
 
-// Format box office numbers into readable format
+/* Function to format box office numbers for OMDb */
 function formatBoxOfficeNumbers(revenue, budget = 0) {
   const formatMoney = (amount) => {
     if (amount >= 1000000000) {
@@ -287,18 +281,18 @@ function formatBoxOfficeNumbers(revenue, budget = 0) {
       return `$${amount.toLocaleString()}`;
     }
   };
-  
+
   let result = `${formatMoney(revenue)} worldwide`;
-  
+
   if (budget > 0) {
     const profitMultiplier = (revenue / budget).toFixed(1);
     result += ` (${profitMultiplier}x budget)`;
   }
-  
+
   return result;
 }
 
-// Simple box office formatting for backup API
+/* Function to format box office numbers for TMDb */
 function formatSimpleBoxOffice(revenue) {
   if (revenue >= 1000000000) {
     return `$${(revenue / 1000000000).toFixed(1)} billion`;
@@ -318,31 +312,31 @@ function formatSimpleBoxOffice(revenue) {
 function getMovieFromCache(title) {
   const cacheKey = title.toLowerCase();
   const cachedItem = movieDataCache.get(cacheKey);
-  
+
   if (!cachedItem) {
     return null;
   }
-  
+
   // Check if cached data is still valid (not expired)
   const timeElapsed = Date.now() - cachedItem.timestamp;
   if (timeElapsed > CACHE_EXPIRY_TIME) {
     movieDataCache.delete(cacheKey);
     return null;
   }
-  
+
   return cachedItem.data;
 }
 
 // Save movie data to cache
 function saveMovieToCache(title, data) {
   const cacheKey = title.toLowerCase();
-  
+
   movieDataCache.set(cacheKey, {
     data: data,
     timestamp: Date.now()
   });
-  
-  
+
+
   // Keep cache size under control
   if (movieDataCache.size > MAX_CACHE_SIZE) {
     // Remove the oldest item (first one added)
@@ -361,7 +355,7 @@ chrome.runtime.onInstalled.addListener((details) => {
   } else if (details.reason === 'update') {
     //comennt
   }
-  
+
   // Clear old cache on install/update
   movieDataCache.clear();
 });
