@@ -363,7 +363,7 @@ function getMovieFromCache(title) {
   return cachedItem.data;
 }
 
-// Save movie data to cache
+/* Function to save movie data to cache (no need to call API frequently) */
 function saveMovieToCache(title, data) {
   const cacheKey = title.toLowerCase();
 
@@ -381,17 +381,14 @@ function saveMovieToCache(title, data) {
   }
 }
 
-// =============================================================================
-// EXTENSION INITIALIZATION - Set up the extension when it starts
-// =============================================================================
 
-// This runs when the extension is first installed or updated
+/* Initialize the extension! This runs when the extension is installed or updated */
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
   } else if (details.reason === 'update') {
-    //comennt
+    //placeholder comment (nothing needs to be done)
   }
 
-  // Clear old cache on install/update
+  // Clear old cache
   movieDataCache.clear();
 });

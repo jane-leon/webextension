@@ -2,7 +2,6 @@
 // It creates a sidebar that shows movie information when in the "About" section
 let movieInfoSidebar = null;          // Will hold our sidebar element
 let currentMovieElement = null;       // Tracks which movie modal we're viewing
-// let detectionDelayTimer = null;       // Timer to prevent too many API calls - COMMENTED OUT
 
 function startExtension() {
   buildMovieInfoSidebar();
@@ -54,7 +53,7 @@ function handleMouseEnterElement(event) {
   }
 }
 
-// When mouse leaves an element, clear the detection timer
+// When mouse leaves an element, set current movie title to null
 function handleMouseLeaveElement(event) {
   const leftElement = event.target;
 
