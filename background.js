@@ -3,7 +3,7 @@
 // Background script for Netflix Movie Info Extension
 
 // Built-in API configuration (no user setup required!)
-const OMDB_API_KEY = '916c6abc'; // Free API key - replace with your own
+const OMDB_API_KEY = 'cb486c88'; 
 const OMDB_BASE_URL = 'https://www.omdbapi.com/';
 
 const TMDB_API_KEY = 'a4f5c5f6e3d2c1b0a9f8e7d6c5b4a3f2'; // Replace with your TMDB key
