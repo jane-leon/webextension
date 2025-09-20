@@ -3,9 +3,9 @@
 // It creates a sidebar that shows movie information when in the "About" section
 
 
-let movieInfoSidebar = null;          // Will hold our sidebar element
-let currentMovieElement = null;       // Tracks which movie modal we're viewing
-// let detectionDelayTimer = null;       // Timer to prevent too many API calls
+let movieInfoSidebar = null;
+let currentMovieElement = null;
+// let detectionDelayTimer = null;
 
 function startExtension() {
   buildMovieInfoSidebar();
