@@ -106,8 +106,13 @@
 
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .movie-info {
@@ -209,17 +214,6 @@
   gap: 6px;
   justify-content: center;
 }
-
-/* UNNEESSARY??? */
-/* .award-badge {
-  background: #8b45131a;
-  color: #8b4513;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid var(--shadow-color);
-} */
 
 /* Box office section */
 .box-office {
