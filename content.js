@@ -1,8 +1,3 @@
-
-// This script runs on Netflix pages and detects when users open movie details
-// It creates a sidebar that shows movie information when in the "About" section
-
-
 let movieInfoSidebar = null;
 let currentMovieElement = null;
 // let detectionDelayTimer = null;
