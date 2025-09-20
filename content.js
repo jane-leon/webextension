@@ -1,16 +1,11 @@
-// =============================================================================
-// NETFLIX MOVIE INFO EXTENSION - CONTENT SCRIPT (Beginner-Friendly Version)
-// =============================================================================
-// This script runs on Netflix pages and detects when users hover over movies
-// It creates a sidebar that shows movie information fetched from APIs
 
-// =============================================================================
-// GLOBAL VARIABLES - These store important information throughout the script
-// =============================================================================
+// This script runs on Netflix pages and detects when users open movie details
+// It creates a sidebar that shows movie information when in the "About" section
+
 
 let movieInfoSidebar = null;          // Will hold our sidebar element
-let currentMovieElement = null;       // Tracks which movie we're hovering over
-let hoverDelayTimer = null;           // Timer to prevent too many API calls
+let currentMovieElement = null;       // Tracks which movie modal we're viewing
+let detectionDelayTimer = null;       // Timer to prevent too many API calls
 
 // =============================================================================
 // MAIN INITIALIZATION - This runs when the page loads
@@ -18,14 +13,10 @@ let hoverDelayTimer = null;           // Timer to prevent too many API calls
 
 function startExtension() {
   console.log('🎬 Netflix Movie Info Extension is starting...');
-  
-  // Step 1: Create the sidebar (but keep it hidden)
+
   buildMovieInfoSidebar();
-  
-  // Step 2: Start listening for mouse movements over movies
-  setupMovieDetection();
-  
-  console.log('✅ Extension is ready! Hover over movies to see info.');
+  setupModalDetection();
+  console.log('✅ Extension is ready! Click "More Info" on movies to see details.');
 }
 
 // =============================================================================
@@ -33,12 +24,9 @@ function startExtension() {
 // =============================================================================
 
 function buildMovieInfoSidebar() {
-  // Don't create multiple sidebars
   if (movieInfoSidebar) return;
   
   console.log('🔨 Building movie info sidebar...');
-  
-  // Create the main sidebar container
   movieInfoSidebar = document.createElement('div');
   movieInfoSidebar.id = 'movie-info-sidebar';
   movieInfoSidebar.className = 'movie-info-sidebar hidden'; // Start hidden
@@ -51,7 +39,7 @@ function buildMovieInfoSidebar() {
     </div>
     <div class="sidebar-content">
       <div class="loading">
-        <p>Hover over a movie poster to see its details!</p>
+        <p>Click "More Info" on a movie and scroll to the About section!</p>
       </div>
     </div>
   `;
@@ -67,11 +55,11 @@ function buildMovieInfoSidebar() {
 }
 
 // =============================================================================
-// MOVIE DETECTION - Listen for mouse movements to detect movie hovers
+// MODAL DETECTION - Listen for when users open Netflix movie modals
 // =============================================================================
 
-function setupMovieDetection() {
-  console.log('👀 Setting up movie detection...');
+function setupModalDetection() {
+  console.log('👀 Setting up Netflix modal detection...');
   
   // Listen for mouse entering elements (mouseover)
   document.addEventListener('mouseover', handleMouseEnterElement);
@@ -80,140 +68,103 @@ function setupMovieDetection() {
   document.addEventListener('mouseout', handleMouseLeaveElement);
 }
 
-// When mouse enters an element, check if it's a movie
+// When mouse enters an element, check if it's a Netflix movie modal
 function handleMouseEnterElement(event) {
   const hoveredElement = event.target;
   
-  // Check if this element is part of a Netflix movie
-  const movieElement = findNetflixMovieElement(hoveredElement);
+  // Check if this element is part of a Netflix movie modal/preview
+  const modalElement = findNetflixModalElement(hoveredElement);
   
-  if (movieElement && movieElement !== currentMovieElement) {
-    console.log('🎯 Found a movie element!', movieElement);
-    currentMovieElement = movieElement;
+  if (modalElement && modalElement !== currentMovieElement) {
+    console.log('🎯 Found a Netflix movie modal!', modalElement);
+    currentMovieElement = modalElement;
     
-    // Don't fetch data immediately - wait a bit to see if user is still hovering
-    clearTimeout(hoverDelayTimer);
-    hoverDelayTimer = setTimeout(() => {
-      loadMovieInformation(movieElement);
+    // Don't fetch data immediately - wait a bit to see if user is still in modal
+    clearTimeout(detectionDelayTimer);
+    detectionDelayTimer = setTimeout(() => {
+      loadMovieInformation(modalElement);
     }, 800); // Wait 800ms before loading info
   }
 }
 
-// When mouse leaves an element, clear the hover timer
+// When mouse leaves an element, clear the detection timer
 function handleMouseLeaveElement(event) {
   const leftElement = event.target;
   
-  // Check if we're no longer hovering over any movie
-  const movieElement = findNetflixMovieElement(leftElement);
+  // Check if we're no longer in any movie modal
+  const modalElement = findNetflixModalElement(leftElement);
   
-  if (!movieElement) {
-    // Clear the timer since we're not hovering over a movie anymore
-    clearTimeout(hoverDelayTimer);
+  if (!modalElement) {
+    // Clear the timer since we're not in a movie modal anymore
+    clearTimeout(detectionDelayTimer);
     currentMovieElement = null;
   }
 }
 
 // =============================================================================
-// NETFLIX ELEMENT DETECTION - Find movie elements in Netflix's HTML structure
+// NETFLIX MODAL DETECTION - Find movie modal elements (More Info sections)
 // =============================================================================
 
-function findNetflixMovieElement(startingElement) {
-  // Netflix uses different CSS classes for movies in different parts of the site
-  // We'll check if the element (or its parents) match any of these patterns
+function findNetflixModalElement(startingElement) {
+  // Netflix uses these CSS classes for movie preview modals and about sections
+  // These appear when users click "More Info" on a movie
   
-  const netflixMovieSelectors = [
-    '.title-card',                    // Regular movie cards
-    '.slider-item',                   // Movies in horizontal sliders
-    '.titleCard',                     // Alternative title card class
-    '[data-uia="title-card"]',        // Cards with data attributes
-    '.bob-card',                      // "Bigger" card format
-    '.previewModal',                  // Movie preview modals
+  const netflixModalSelectors = [
+    '.previewModal',                  // Main preview modal container
     '[class*="previewModal"]',        // Any preview modal variant
     '.about-wrapper',                 // About sections in modals
     '.about-header',                  // About section headers
-    '[data-uia*="preview"]'           // Any preview-related elements
+    '[data-uia*="preview"]',          // Any preview-related elements
+    '.title-card',                    // Some title cards (backup)
+    '.slider-item',                   // Movies in horizontal sliders (backup)
+    '.titleCard',                     // Alternative title card class (backup)
+    '[data-uia="title-card"]',        // Cards with data attributes (backup)
+    '.bob-card'                       // "Bigger" card format (backup)
   ];
   
   // Check each selector to see if our element matches
-  for (let selector of netflixMovieSelectors) {
+  for (let selector of netflixModalSelectors) {
     // .closest() looks at the element and all its parent elements
     const foundElement = startingElement.closest(selector);
     if (foundElement) {
-      console.log(`📍 Found movie using selector: ${selector}`);
+      console.log(`📍 Found Netflix modal using selector: ${selector}`);
       return foundElement;
     }
   }
   
-  // No movie element found
+  // No modal element found
   return null;
 }
 
 // =============================================================================
-// MOVIE TITLE EXTRACTION - Get the movie name from Netflix's HTML
+// MOVIE TITLE EXTRACTION - Get movie name from Netflix's modal About section
 // =============================================================================
 
-function extractMovieTitle(movieElement) {
-  console.log('🔍 Trying to extract movie title from element...');
+function extractMovieTitle(modalElement) {
+  console.log('🔍 Trying to extract movie title from Netflix modal...');
   
   let movieTitle = null;
   
-  // Method 1: Look for title in Netflix modal headers (most reliable)
-  const modalTitle = movieElement.querySelector('.previewModal--section-header strong');
+  // Method 1: Look for title in Netflix modal headers (MOST RELIABLE)
+  // This is the main target - when users click "More Info" and see the About section
+  const modalTitle = modalElement.querySelector('.previewModal--section-header strong');
   if (modalTitle) {
     movieTitle = modalTitle.textContent.trim();
-    console.log('✅ Found title in modal header:', movieTitle);
+    console.log('✅ Found title in modal About section header:', movieTitle);
   }
   
-  // Method 2: Look for other strong text elements that might contain titles
-  if (!movieTitle) {
-    const strongElements = movieElement.querySelectorAll('strong');
-    for (let strongElement of strongElements) {
-      const text = strongElement.textContent.trim();
-      if (text.length > 2 && !isUIText(text)) {
-        movieTitle = text;
-        console.log('✅ Found title in strong element:', movieTitle);
-        break;
-      }
-    }
-  }
-  
-  // Method 3: Look for title in aria-label attribute
-  if (!movieTitle && movieElement.getAttribute('aria-label')) {
-    movieTitle = movieElement.getAttribute('aria-label');
-    console.log('✅ Found title in aria-label:', movieTitle);
-  }
-  
-  // Method 4: Look for title in image alt text
-  if (!movieTitle) {
-    const image = movieElement.querySelector('img');
-    if (image && image.alt && image.alt.length > 2) {
-      movieTitle = image.alt;
-      console.log('✅ Found title in image alt text:', movieTitle);
-    }
-  }
-  
-  // Method 5: Look for data attributes that might contain the title
-  if (!movieTitle) {
-    const possibleDataAttributes = ['data-title', 'data-uia-title', 'data-video-title'];
-    for (let attribute of possibleDataAttributes) {
-      const value = movieElement.getAttribute(attribute);
-      if (value && value.length > 2) {
-        movieTitle = value;
-        console.log(`✅ Found title in ${attribute}:`, movieTitle);
-        break;
-      }
-    }
-  }
+
+
   
   // Clean up the title and return it
   return cleanupMovieTitle(movieTitle);
 }
 
-// Helper function to check if text looks like UI text rather than a movie title
-function isUIText(text) {
-  const uiTexts = ['Play', 'Add to List', 'More Info', 'Watch Now', 'New', 'Popular', 'Trending'];
-  return uiTexts.some(uiText => text.toLowerCase().includes(uiText.toLowerCase()));
-}
+// // Helper function to check if text looks like UI text rather than a movie title
+// function isUIText(text) {
+//   const uiTexts = ['Play', 'Add to List', 'More Info', 'Watch Now', 'New', 'Popular', 'Trending'];
+//   return uiTexts.some(uiText => text.toLowerCase().includes(uiText.toLowerCase()));
+// }
 
 // Helper function to clean up extracted movie titles
 function cleanupMovieTitle(title) {
@@ -242,11 +193,11 @@ function cleanupMovieTitle(title) {
 // MOVIE INFORMATION LOADING - Get movie data and display it
 // =============================================================================
 
-async function loadMovieInformation(movieElement) {
-  console.log('📡 Loading movie information...');
+async function loadMovieInformation(modalElement) {
+  console.log('📡 Loading movie information from modal...');
   
-  // Extract the movie title from the HTML element
-  const movieTitle = extractMovieTitle(movieElement);
+  // Extract the movie title from the modal HTML element
+  const movieTitle = extractMovieTitle(modalElement);
   
   if (!movieTitle) {
     console.log('❌ Could not extract movie title');
