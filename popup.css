@@ -100,13 +100,14 @@ body {
   font-size: 14px;
 }
 
+/* Formatting for instructions to use */
 .content {
   padding: 24px;
   background: white;
   color: #333;
 }
 
-/* List of information that is provided by the extension */
+/* List of movie & TV show info that is provided by the extension */
 .feature-list {
   list-style: none;
   padding: 0;
