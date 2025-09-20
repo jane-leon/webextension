@@ -188,6 +188,7 @@ function displayMovieInformation(movieData) {
       ${buildRatingsSection(movieData)}
       ${buildAwardsSection(movieData)}
       ${buildBoxOfficeSection(movieData)}
+      ${buildFunFactSection(movieData)}
       ${buildReviewsSection(movieData)}
     </div>
   `;
@@ -289,6 +290,19 @@ function buildReviewsSection(movieData) {
 
   reviewsHTML += '</div>';
   return reviewsHTML;
+}
+
+function buildFunFactSection(movieData) {
+  if (!movieData.funFact) {
+    return '';
+  }
+
+  return `
+    <div class="movie-fun-fact">
+      <h5>🎭 Fun Fact</h5>
+      <p>${movieData.funFact}</p>
+    </div>
+  `;
 }
 
 /* Restart extension when user scrolls on Netflix */
