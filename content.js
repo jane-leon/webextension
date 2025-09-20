@@ -2,19 +2,23 @@ let movieInfoSidebar = null;
 let currentMovieElement = null;
 // let detectionDelayTimer = null;
 
+
 function startExtension() {
   buildMovieInfoSidebar();
   setupModalDetection();
 }
 
 
+
+
 function buildMovieInfoSidebar() {
   if (movieInfoSidebar) return;
+
 
   movieInfoSidebar = document.createElement('div');
   movieInfoSidebar.id = 'movie-info-sidebar';
   movieInfoSidebar.className = 'movie-info-sidebar hidden'; // Start hidden
-  
+ 
   movieInfoSidebar.innerHTML = `
     <div class="sidebar-header">
       <h3>🎬 Movie / TV Show Info 🎬</h3>
@@ -26,14 +30,15 @@ function buildMovieInfoSidebar() {
       </div>
     </div>
   `;
-  
+ 
   // Add the sidebar to the page
   document.body.appendChild(movieInfoSidebar);
-  
+ 
   // Make the close button work
   const closeButton = movieInfoSidebar.querySelector('.close-btn');
   closeButton.addEventListener('click', hideSidebar);
 }
+
 
 // Listen for when users open Netflix movie about page
 function setupModalDetection() {  
@@ -41,17 +46,19 @@ function setupModalDetection() {
   document.addEventListener('mouseout', handleMouseLeaveElement);
 }
 
+
 // When mouse enters an element, check if it's a Netflix movie modal
 function handleMouseEnterElement(event) {
   const hoveredElement = event.target;
-  
+ 
   // Check if this element is part of a Netflix movie modal/preview
   const modalElement = findNetflixModalElement(hoveredElement);
-  
+ 
   if (modalElement && modalElement !== currentMovieElement) {
     currentMovieElement = modalElement;
 
-    loadMovieInformation(modalElement); 
+
+    loadMovieInformation(modalElement);
     // // Don't fetch data immediately - wait a bit to see if user is still in modal
     // clearTimeout(detectionDelayTimer);
     // detectionDelayTimer = setTimeout(() => {
@@ -60,13 +67,14 @@ function handleMouseEnterElement(event) {
   }
 }
 
+
 // When mouse leaves an element, clear the detection timer
 function handleMouseLeaveElement(event) {
   const leftElement = event.target;
-  
+ 
   // Check if we're no longer in any movie modal
   const modalElement = findNetflixModalElement(leftElement);
-  
+ 
   if (!modalElement) {
     currentMovieElement = null;
     // // Clear the timer since we're not in a movie modal anymore
@@ -76,12 +84,15 @@ function handleMouseLeaveElement(event) {
 }
 
 
+
+
 /* Find movie modal elements ("About" section) */
+
 
 function findNetflixModalElement(startingElement) {
   // Netflix uses these CSS classes for movie preview modals and about sections
   // These appear when users click "More Info" on a movie
-  
+ 
   const netflixModalSelectors = [
     '.previewModal',                  // Main preview modal container
     '[class*="previewModal"]',        // Any preview modal variant
@@ -94,31 +105,34 @@ function findNetflixModalElement(startingElement) {
     '[data-uia="title-card"]',        // Cards with data attributes (backup)
     '.bob-card'                       // "Bigger" card format (backup)
   ];
-  
+ 
   // Check selectors to see if element matches
   for (let selector of netflixModalSelectors) {
     // Look at the element and all its parent elements
     const foundElement = startingElement.closest(selector);
   }
-  
+ 
   // No modal element found
   return null;
 }
 
+
 /* Title extraction: Get movie name from Netflix's modal "About" section */
+
 
 function extractMovieTitle(modalElement) {
   let movieTitle = null;
-  
+ 
   // Users click "More Info" and see the "About" section
   const modalTitle = modalElement.querySelector('.previewModal--section-header strong');
   if (modalTitle) {
     movieTitle = modalTitle.textContent.trim();
   }
-  
+ 
   // Clean up the title and return it
   return cleanupMovieTitle(movieTitle);
 }
+
 
 // // Helper function to check if text looks like UI text rather than a movie title
 // function isUIText(text) {
@@ -126,62 +140,67 @@ function extractMovieTitle(modalElement) {
 //   return uiTexts.some(uiText => text.toLowerCase().includes(uiText.toLowerCase()));
 // }
 
+
 // Helper function to clean up extracted movie titles
 function cleanupMovieTitle(title) {
   if (!title) {
     return null;
   }
-  
+ 
   // Remove common Netflix UI text
   title = title.replace(/^(Play|Add to List|More Info|Watch Now)/i, '');
-  
+ 
   // Clean up extra spaces
   title = title.replace(/\s+/g, ' ').trim();
-  
+ 
   // Title can't be too short
   if (title.length < 2) {
     return null;
   }
-  
+ 
   return title;
 }
 
+
 /* Get movie data and display it */
 
+
 async function loadMovieInformation(modalElement) {
-  
+ 
   // Extract the movie title from the modal HTML element
   const movieTitle = extractMovieTitle(modalElement);
-  
+ 
   if (!movieTitle) {
     return;
   }
-  
+ 
   // Show the sidebar with a loading message
   showSidebar();
   showLoadingMessage(movieTitle);
-  
+ 
   try {
     // Send a message to the background script to fetch movie data
-    
+   
     const response = await chrome.runtime.sendMessage({
       action: 'getMovieInfo',    // Tell background script what we want
       title: movieTitle          // Send the movie title
     });
-    
+   
     // Check if we got data successfully
     if (response.success) {
       displayMovieInformation(response.data);
     } else {
       showErrorMessage(response.error || 'Movie not found');
     }
-    
+   
   } catch (error) {
     showErrorMessage('Failed to fetch movie information');
   }
 }
 
+
 /* Extension sidebar: show/hide extension and content */
+
 
 function showSidebar() {
   if (movieInfoSidebar) {
@@ -189,12 +208,14 @@ function showSidebar() {
   }
 }
 
+
 function hideSidebar() {
   if (movieInfoSidebar) {
     movieInfoSidebar.classList.add('hidden');
   }
   currentMovieElement = null;
 }
+
 
 function showLoadingMessage(movieTitle) {
   const contentArea = movieInfoSidebar.querySelector('.sidebar-content');
@@ -206,6 +227,7 @@ function showLoadingMessage(movieTitle) {
   `;
 }
 
+
 function showErrorMessage(errorText) {
   const contentArea = movieInfoSidebar.querySelector('.sidebar-content');
   contentArea.innerHTML = `
@@ -216,11 +238,13 @@ function showErrorMessage(errorText) {
   `;
 }
 
+
 /* Content: Format and show movie info */
+
 
 function displayMovieInformation(movieData) {  
   const contentArea = movieInfoSidebar.querySelector('.sidebar-content');
-  
+ 
   // Build the HTML for movie information
   contentArea.innerHTML = `
     <div class="movie-info">
@@ -234,18 +258,21 @@ function displayMovieInformation(movieData) {
   `;
 }
 
+
 // Helper functions to build different sections of the movie display
+
 
 function buildMoviePosterSection(movieData) {
   const posterUrl = movieData.Poster !== 'N/A' ? movieData.Poster : 'https://via.placeholder.com/150x225?text=No+Image';
-  
+ 
   return `
     <div class="movie-poster">
-      <img src="${posterUrl}" alt="${movieData.Title}" 
+      <img src="${posterUrl}" alt="${movieData.Title}"
            onerror="this.src='https://via.placeholder.com/150x225?text=No+Image'">
     </div>
   `;
 }
+
 
 function buildMovieDetailsSection(movieData) {
   return `
@@ -259,9 +286,10 @@ function buildMovieDetailsSection(movieData) {
   `;
 }
 
+
 function buildRatingsSection(movieData) {
   let ratingsHTML = '<div class="ratings">';
-  
+ 
   // Imdb rating
   if (movieData.imdbRating !== 'N/A') {
     ratingsHTML += `
@@ -271,7 +299,7 @@ function buildRatingsSection(movieData) {
       </div>
     `;
   }
-  
+ 
   // Rotten Tomatoes rating
   if (movieData.Ratings) {
     const rtRating = movieData.Ratings.find(r => r.Source === 'Rotten Tomatoes');
@@ -284,16 +312,17 @@ function buildRatingsSection(movieData) {
       `;
     }
   }
-  
+ 
   ratingsHTML += '</div>';
   return ratingsHTML;
 }
+
 
 function buildAwardsSection(movieData) {
   if (!movieData.Awards || movieData.Awards === 'N/A') {
     return '';
   }
-  
+ 
   return `
     <div class="movie-awards">
       <h5>Awards 🏆</h5>
@@ -302,11 +331,12 @@ function buildAwardsSection(movieData) {
   `;
 }
 
+
 function buildBoxOfficeSection(movieData) {
   if (!movieData.detailedInfo || !movieData.detailedInfo.boxOffice) {
     return '';
   }
-  
+ 
   return `
     <div class="box-office">
       <h5>Box Office 💸</h5>
@@ -315,16 +345,17 @@ function buildBoxOfficeSection(movieData) {
   `;
 }
 
+
 function buildReviewsSection(movieData) {
   if (!movieData.userReviews || movieData.userReviews.length === 0) {
     return '';
   }
-  
+ 
   let reviewsHTML = `
     <div class="movie-reviews">
       <h5>Top Reviews 👥</h5>
   `;
-  
+ 
   movieData.userReviews.forEach(review => {
     reviewsHTML += `
       <div class="review-item">
@@ -337,33 +368,39 @@ function buildReviewsSection(movieData) {
       </div>
     `;
   });
-  
+ 
   reviewsHTML += '</div>';
   return reviewsHTML;
 }
 
+
 /* Restart extension when user scrolls on Netflix */
 
+
 let currentPageUrl = location.href;
+
 
 // Watch changes to page content
 const pageObserver = new MutationObserver(() => {
   const newUrl = location.href;
   if (newUrl !== currentPageUrl) {
     currentPageUrl = newUrl;
-    
+   
     // Wait for Netflix to load the new content, then restart
     setTimeout(startExtension, 1500);
   }
 });
 
+
 // Start watching for page changes
-pageObserver.observe(document, { 
+pageObserver.observe(document, {
   subtree: true,
   childList: true
 });
 
+
 /* Load extension */
+
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', startExtension);
