@@ -2,11 +2,13 @@
 
 // Background script for Netflix Movie Info Extension
 
-// Built-in API configuration (no user setup required!)
-const OMDB_API_KEY = '916c6abc'; // Free API key - replace with your own
+// API Configuration - Replace with your actual API keys
+// Get OMDb API key from: http://www.omdbapi.com/
+// Get TMDB API key from: https://www.themoviedb.org/settings/api
+const OMDB_API_KEY = 'your-omdb-api-key-here';
 const OMDB_BASE_URL = 'https://www.omdbapi.com/';
 
-const TMDB_API_KEY = 'a4f5c5f6e3d2c1b0a9f8e7d6c5b4a3f2'; // Replace with your TMDB key
+const TMDB_API_KEY = 'your-tmdb-api-key-here';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 // Cache for movie data to reduce API calls
