@@ -51,13 +51,6 @@ function handleMouseEnterElement(event) {
     currentMovieElement = modalElement;
 
     loadMovieInformation(modalElement);
-
-    // Timer-based approach:
-    // Don't fetch data immediately - wait a bit to see if user is still in modal
-    // clearTimeout(detectionDelayTimer);
-    // detectionDelayTimer = setTimeout(() => {
-    //   loadMovieInformation(modalElement);
-    // }, 800); // Wait 800ms before loading info
   }
 }
 
@@ -71,8 +64,6 @@ function handleMouseLeaveElement(event) {
   if (!modalElement) {
     // Reset current element since we're not in a movie modal anymore
     currentMovieElement = null;
-    // Clear the timer since we're not in a movie modal anymore
-    // clearTimeout(detectionDelayTimer);
   }
 }
 
