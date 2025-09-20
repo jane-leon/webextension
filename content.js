@@ -1,4 +1,3 @@
-// Netflix Movie Info Extension - Content Script
 let sidebar = null;
 let currentHoveredElement = null;
 let hoverTimeout = null;
@@ -42,10 +41,10 @@ function attachMovieListeners() {
     '.titleCard',
     '[data-uia="title-card"]',
     '.bob-card',
-    '.previewModal',              // Preview modals like you showed
-    '[class*="previewModal"]',    // Any preview modal class
-    '.about-wrapper',             // About sections in modals
-    '.about-header'               // About headers
+    '.previewModal',
+    '[class*="previewModal"]',
+    '.about-wrapper',
+    '.about-header'
   ];
   
   // Use event delegation for dynamic content
