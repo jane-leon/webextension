@@ -11,7 +11,7 @@ body {
   padding: 0;
   margin: 0;
   font-family: var(--font);
-  background: var(--medium-color);
+  background: var(--bkg-color);
   /* color: white; */
 }
 
@@ -19,6 +19,7 @@ body {
 .header {
   padding: 20px;
   text-align: center;
+  color: #FFF;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
 }
