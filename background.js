@@ -14,7 +14,6 @@ const MAX_CACHE_SIZE = 100; // Maximum number of movies to cache
 
 // This is how content script and background script communicate
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  
   // Check if the content script is asking for movie information
   if (message.action === 'getMovieInfo') {
     fetchCompleteMovieInfo(message.title)
@@ -31,45 +30,38 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 //fetching movie info!!
 async function fetchCompleteMovieInfo(movieTitle) {
-  
   try {
-    // Step 1: Check if we already have this movie in our cache
+    //Check if we already have this movie in our cache
     const cachedData = getMovieFromCache(movieTitle);
     if (cachedData) {
       return cachedData;
     }
-    
-    // Step 2: Clean up the movie title for better API results
+    // Clean up the movie title for better API results
     const cleanTitle = cleanMovieTitle(movieTitle);
-    
     const dataPromises = [
-      fetchBasicMovieData(cleanTitle),    // Basic info from OMDb
-      fetchMovieReviews(cleanTitle),      // User reviews from TMDB
-      fetchDetailedMovieData(cleanTitle)  // Additional details from TMDB
+      fetchBasicMovieData(cleanTitle),    
+      fetchMovieReviews(cleanTitle),      
+      fetchDetailedMovieData(cleanTitle)  
     ];
-    
-    // Wait for all API calls to complete (or fail)
+  
     const results = await Promise.allSettled(dataPromises);
-    
-    // Step 4: Process the results
+    //Process the results
     const basicData = results[0].status === 'fulfilled' ? results[0].value : null;
     const reviews = results[1].status === 'fulfilled' ? results[1].value : [];
     const detailedData = results[2].status === 'fulfilled' ? results[2].value : {};
     
-    // Step 5: If primary API failed, try backup API
+    //If primary API failed, try backup API
     let finalMovieData = basicData;
     if (!finalMovieData) {
       finalMovieData = await fetchMovieDataFromTMDB(cleanTitle);
     }
-    
-    // Step 6: Combine all the data
+    // Combine all the data
     if (finalMovieData) {
       finalMovieData.userReviews = reviews;
       finalMovieData.detailedInfo = detailedData;
       
-      // Step 7: Save to cache for future use
+      //Save to cache for future use
       saveMovieToCache(movieTitle, finalMovieData);
-      
       return finalMovieData;
     } else {
       throw new Error('Movie not found in any database');
@@ -88,17 +80,11 @@ function cleanMovieTitle(title) {
 
 async function fetchBasicMovieData(title) {
   try {
-    // Build the API URL
     const apiUrl = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(title)}&plot=short`;
-    
     // Make the API call
     const response = await fetch(apiUrl);
     const data = await response.json();
-    
-    // Check if the API call was successful
     if (data.Response === 'False') {
-      
-      // Try searching instead of exact match
       return await searchMovieInOMDb(title);
     }
     return data;
@@ -127,15 +113,12 @@ async function searchMovieInOMDb(title) {
         return detailData;
       }
     }
-    
     throw new Error('No matching movies found in OMDb');
-    
   } catch (error) {
     console.error('Error in OMDb search:', error);
     throw error;
   }
 }
-
 
 async function fetchMovieReviews(title) {
   try {
@@ -148,12 +131,10 @@ async function fetchMovieReviews(title) {
     const reviewsUrl = `${TMDB_API_URL}/movie/${movieId}/reviews?api_key=${TMDB_API_KEY}`;
     const response = await fetch(reviewsUrl);
     const data = await response.json();
-    
     //Process and format the reviews
     if (!data.results || data.results.length === 0) {
       return [];
     }
-    
     //Take the first 3 reviews and format them nicely
     const formattedReviews = data.results.slice(0, 3).map(review => ({
       author: review.author,
@@ -172,7 +153,6 @@ async function fetchMovieReviews(title) {
 }
 
 async function fetchDetailedMovieData(title) {
-  
   try {
     // Find the movie ID in TMDB
     const movieId = await findMovieIdInTMDB(title);
