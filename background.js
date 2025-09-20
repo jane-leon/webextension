@@ -17,8 +17,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   
   // Check if the content script is asking for movie information
   if (message.action === 'getMovieInfo') {
-
-    // Fetch the movie information (this is async, so we need to handle it properly)
     fetchCompleteMovieInfo(message.title)
       .then(movieData => {
         sendResponse({ success: true, data: movieData });
@@ -83,21 +81,12 @@ async function fetchCompleteMovieInfo(movieTitle) {
   }
 }
 
-// =============================================================================
-// TITLE CLEANING - Improve movie titles for better API search results
-// =============================================================================
-
 function cleanMovieTitle(title) {
   let cleanedTitle = title.replace(/\s+/g, ' ').trim();
   return cleanedTitle;
 }
 
-// =============================================================================
-// BASIC MOVIE DATA - Fetch main movie information from OMDb API
-// =============================================================================
-
 async function fetchBasicMovieData(title) {
-  
   try {
     // Build the API URL
     const apiUrl = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(title)}&plot=short`;
@@ -112,9 +101,7 @@ async function fetchBasicMovieData(title) {
       // Try searching instead of exact match
       return await searchMovieInOMDb(title);
     }
-    
     return data;
-    
   } catch (error) {
     console.error('Error fetching from OMDb:', error);
     throw new Error(`OMDb API error: ${error.message}`);
@@ -129,17 +116,13 @@ async function searchMovieInOMDb(title) {
     const searchUrl = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(title)}`;
     const searchResponse = await fetch(searchUrl);
     const searchData = await searchResponse.json();
-    
-    
     // Check if we found any results
     if (searchData.Response === 'True' && searchData.Search && searchData.Search.length > 0) {
       // Get detailed info for the first (most relevant) result
       const firstResult = searchData.Search[0];
-      
       const detailUrl = `${OMDB_API_URL}?apikey=${OMDB_API_KEY}&i=${firstResult.imdbID}&plot=short`;
       const detailResponse = await fetch(detailUrl);
       const detailData = await detailResponse.json();
-      
       if (detailData.Response === 'True') {
         return detailData;
       }
@@ -153,32 +136,25 @@ async function searchMovieInOMDb(title) {
   }
 }
 
-// =============================================================================
-// MOVIE REVIEWS - Fetch user reviews from TMDB API
-// =============================================================================
 
 async function fetchMovieReviews(title) {
-  
   try {
-    // Step 1: Search for the movie to get its TMDB ID
+    //Search for the movie to get its TMDB ID
     const movieId = await findMovieIdInTMDB(title);
     if (!movieId) {
       return [];
     }
-    
-    // Step 2: Get reviews using the movie ID
+    //Get reviews using the movie ID
     const reviewsUrl = `${TMDB_API_URL}/movie/${movieId}/reviews?api_key=${TMDB_API_KEY}`;
-    
     const response = await fetch(reviewsUrl);
     const data = await response.json();
     
-    
-    // Step 3: Process and format the reviews
+    //Process and format the reviews
     if (!data.results || data.results.length === 0) {
       return [];
     }
     
-    // Take the first 3 reviews and format them nicely
+    //Take the first 3 reviews and format them nicely
     const formattedReviews = data.results.slice(0, 3).map(review => ({
       author: review.author,
       content: shortenText(review.content, 300), // Limit review length
@@ -195,29 +171,20 @@ async function fetchMovieReviews(title) {
   }
 }
 
-// =============================================================================
-// DETAILED MOVIE DATA - Fetch additional info like box office from TMDB
-// =============================================================================
-
 async function fetchDetailedMovieData(title) {
   
   try {
-    // Step 1: Find the movie ID in TMDB
+    // Find the movie ID in TMDB
     const movieId = await findMovieIdInTMDB(title);
     if (!movieId) {
       return {};
     }
-    
-    // Step 2: Get detailed movie information
+    // Get detailed movie information
     const detailUrl = `${TMDB_API_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}`;
-    
     const response = await fetch(detailUrl);
     const data = await response.json();
-    
-    
-    // Step 3: Extract useful information
+    //Extract useful information
     const detailedInfo = {};
-    
     // Box office information
     if (data.revenue && data.revenue > 0) {
       detailedInfo.boxOffice = {
@@ -227,14 +194,12 @@ async function fetchDetailedMovieData(title) {
       };
     }
     
-    // Additional ratings and popularity
     detailedInfo.popularity = data.popularity || 0;
     detailedInfo.voteAverage = data.vote_average || 0;
     detailedInfo.voteCount = data.vote_count || 0;
     
-
     return detailedInfo;
-    
+
   } catch (error) {
     console.error('Error fetching detailed data from TMDB:', error);
     return {}; // Return empty object instead of failing completely
@@ -248,7 +213,7 @@ async function fetchDetailedMovieData(title) {
 async function fetchMovieDataFromTMDB(title) {
   
   try {
-    // Step 1: Search for the movie
+    // Search for the movie
     const movieId = await findMovieIdInTMDB(title);
     if (!movieId) {
       throw new Error('Movie not found in TMDB');
