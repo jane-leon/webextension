@@ -4,10 +4,10 @@
 const OMDB_API_KEY = 'cb486c88';
 const OMDB_API_URL = 'https://www.omdbapi.com/';
 
-const TMDB_API_KEY = '3126e89bfccb852840b00afa13857781';
+const TMDB_API_KEY = 'blank';
 const TMDB_API_URL = 'https://api.themoviedb.org/3';
 
-const GEMINI_API_KEY = 'AIzaSyCVftdUFa2Dc88-VmFg9phUGAqRd2o8GLU'; 
+const GEMINI_API_KEY = 'blank'; 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // Create a cache to store movie data (like a dictionary/map)
