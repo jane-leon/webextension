@@ -23,12 +23,12 @@ body {
 }
 
 .header img {
-  width: 20%;
-  margin-right: 8%;
+  width: 30%;
+  margin-right: 10%;
 }
 
 .header h1 {
-  font-size: 22px;
+  font-size: 35px;
   font-weight: 600;
   color: var(--text-color);
 }

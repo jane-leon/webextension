@@ -1,13 +1,13 @@
 // Backend: handles API calls to movie & TV show databases
 // Gets movie/show info when content.js requests that info
 
-const OMDB_API_KEY = 'blank';
+const OMDB_API_KEY = 'put_your_key_here';
 const OMDB_API_URL = 'https://www.omdbapi.com/';
 
-const TMDB_API_KEY = 'blank';
+const TMDB_API_KEY = 'put_your_key_here';
 const TMDB_API_URL = 'https://api.themoviedb.org/3';
 
-const GEMINI_API_KEY = 'blank'; 
+const GEMINI_API_KEY = 'put_your_key_here'; 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // Create a cache to store movie data (like a dictionary/map)

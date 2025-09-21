@@ -81,7 +81,7 @@
 
 .sidebar-content {
   padding: 20px;
-  max-height: calc(80vh - 60px);
+  max-height: calc(70vh - 60px);
   overflow-y: auto;
 }
 

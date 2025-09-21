@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Netflix Web Extension",
+  "name": "TakeTwo",
   "version": "1.0",
   "description": "Web extension for Chrome that works on Netflix's website to show some info about movies and TV shows that isn't included in Netflix already.",
   "permissions": [
