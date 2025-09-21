@@ -10,8 +10,7 @@
   --light-text-color: white;
   --hover-color: #ffffff33;
   --shadow-color: black;
-  --reg-font: 'Poppins', 'Helvetica', sans-serif;
-  --header-font: 'Poppins', sans-serif;
+  --font: 'Poppins', 'Helvetica', sans-serif;
 }
 
 
@@ -27,7 +26,7 @@
   border-radius: 12px;
   box-shadow: 0 8px 32px var(--shadow-color);
   z-index: 999999;
-  font-family: var(--reg-font);
+  font-family: var(--font);
   font-size: 14px;
   line-height: 1.4;
   overflow: hidden;
@@ -44,7 +43,7 @@
 
 .sidebar-header {
   background: var(--light-color);
-  font-family: var(--header-font);
+  font-family: var(--font);
   color: var(--bkg-color);
   padding: 16px 20px;
   display: flex;
@@ -54,7 +53,7 @@
 
 .sidebar-header h3 {
   margin: 0;
-  font-family: var(--header-font);;
+  font-family: var(--font);;
   color: var(--medium-color);
   font-size: 20px;
   font-weight: 600;
@@ -132,7 +131,7 @@
 }
 
 .movie-details {
-  font-family: var(--reg-font);
+  font-family: var(--font);
   display: flex;
   flex-direction: column;
   gap: 12px;

@@ -210,7 +210,7 @@ function buildRatingsSection(movieData) {
   if (movieData.imdbRating !== 'N/A') {
     ratingsHTML += `
       <div class="rating">
-        <span class="rating-label">🎥 IMDb</span>
+        <span class="rating-label">IMDb 🎥</span>
         <span class="rating-value">${movieData.imdbRating}/10</span>
       </div>
     `;
