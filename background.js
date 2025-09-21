@@ -1,7 +1,7 @@
 // Backend: handles API calls to movie & TV show databases
 // Gets movie/show info when content.js requests that info
 
-const OMDB_API_KEY = 'cb486c88';
+const OMDB_API_KEY = 'blank';
 const OMDB_API_URL = 'https://www.omdbapi.com/';
 
 const TMDB_API_KEY = 'blank';

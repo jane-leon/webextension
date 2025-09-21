@@ -1,5 +1,5 @@
 /* Styling for sidebar element of the extension, connected to content.js */
-@import url(https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;1,100;1,300;1,400;1,500;1,600;1,700&display=swap);
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;900&display=swap');
 
 :root {
   --medium-color: #764ba2;
@@ -11,6 +11,7 @@
   --hover-color: #ffffff33;
   --shadow-color: black;
   --reg-font: 'Poppins', 'Helvetica', sans-serif;
+  --header-font: 'Poppins', sans-serif;
 }
 
 
@@ -43,7 +44,7 @@
 
 .sidebar-header {
   background: var(--light-color);
-  font-family: var(--reg-font);
+  font-family: var(--header-font);
   color: var(--bkg-color);
   padding: 16px 20px;
   display: flex;
@@ -53,9 +54,9 @@
 
 .sidebar-header h3 {
   margin: 0;
-  font-family: var(--reg-font);
+  font-family: var(--header-font);;
   color: var(--medium-color);
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
 }
 
@@ -351,15 +352,15 @@
 }
 
 .sidebar-content::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #8e6796;
   border-radius: 3px;
 }
 
 .sidebar-content::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #734282;
   border-radius: 3px;
 }
 
 .sidebar-content::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #b494be;
 }
