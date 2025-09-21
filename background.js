@@ -144,7 +144,6 @@ async function fetchMovieReviews(title) {
       author: review.author,
       content: shortenText(review.content, 300), // Limit review length
       rating: review.author_details.rating || 'N/A',
-      url: review.url,
       created_at: formatDate(review.created_at)
     }));
 
@@ -156,7 +155,7 @@ async function fetchMovieReviews(title) {
   }
 }
 
-/* Helper function to get more detailed info from TMDb */
+/* Helper function to get more detailed info from TMDb, only box office info*/
 async function fetchDetailedMovieData(title) {
   try {
     // Find the movie ID in TMDB
@@ -174,14 +173,9 @@ async function fetchDetailedMovieData(title) {
     if (data.revenue && data.revenue > 0) {
       detailedInfo.boxOffice = {
         revenue: data.revenue,
-        budget: data.budget || 0,
-        formatted: formatBoxOfficeNumbers(data.revenue, data.budget)
+        formatted: formatBoxOfficeNumbers(data.revenue)
       };
     }
-
-    detailedInfo.popularity = data.popularity || 0;
-    detailedInfo.voteAverage = data.vote_average || 0;
-    detailedInfo.voteCount = data.vote_count || 0;
 
     return detailedInfo;
 
@@ -198,7 +192,7 @@ async function fetchMovieDataFromTMDB(title) {
     // Search for the movie
     const movieId = await findMovieIdInTMDB(title);
     if (!movieId) {
-      throw new Error('Movie not found in TMDB');
+      throw new Error('Movie not found!');
     }
 
     //Get detailed movie info
@@ -276,23 +270,18 @@ function formatDate(dateString) {
 }
 
 /* Function to format box office numbers for OMDb */
-function formatBoxOfficeNumbers(revenue, budget = 0) {
+function formatBoxOfficeNumbers(revenue) {
   const formatMoney = (amount) => {
     if (amount >= 1000000000) {
-      return `$${(amount / 1000000000).toFixed(1)}B`;
+      return `$${(amount / 1000000000).toFixed(1)} billion`;
     } else if (amount >= 1000000) {
-      return `$${(amount / 1000000).toFixed(0)}M`;
+      return `$${(amount / 1000000).toFixed(0)} million`;
     } else {
       return `$${amount.toLocaleString()}`;
     }
   };
 
   let result = `${formatMoney(revenue)} worldwide`;
-
-  if (budget > 0) {
-    const profitMultiplier = (revenue / budget).toFixed(1);
-    result += ` (${profitMultiplier}x budget)`;
-  }
 
   return result;
 }
