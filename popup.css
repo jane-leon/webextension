@@ -2,7 +2,7 @@
   --medium-color: #764ba2;
   --light-color: #e3d7f0;
   --bkg-color: #ffffff;
-  --text-color: #333333;
+  --text-color: black;
   --font: 'Poppins', 'Helvetica', sans-serif;
 }
 
@@ -17,7 +17,7 @@ body {
 
 /* Formatting for title banner on web extension instructions */
 .header {
-  padding: 20px 20px 10px;
+  padding: 20px 15px 10px;
   text-align: center;
   display: flex;
 }
@@ -30,7 +30,7 @@ body {
 .header h1 {
   font-size: 22px;
   font-weight: 600;
-  color: black;
+  color: var(--text-color);
 }
 
 h4{
@@ -48,11 +48,14 @@ h4{
   border-radius: 8px;
   padding: 2px;
   box-shadow: 10px 10px var(--medium-color);
+  outline: var(--text-color) solid 2px;
+  margin-top: 27px;
 }
 
 .features h4 {
   margin: 20px 0 0 12px; 
   font-size: 14px;
+  color: var(--text-color);
 }
 
 /* List of info that is provided by the extension */
@@ -92,10 +95,11 @@ h4{
   margin-top: 16px;
   margin-bottom: 16px;
   box-shadow: 10px 10px var(--medium-color);
+  outline: var(--text-color) solid 2px;
 }
 
 .instructions h4 {
-  margin: 0 0 8px 0;
+  margin: 9px 0 8px 0;
   font-size: 14px;
 }
 
